@@ -1,0 +1,83 @@
+plugins {
+	id 'java-library'
+}
+
+version = '20.05.01.01'
+group = 'seung.java'
+
+java {
+	sourceCompatibility = JavaVersion.VERSION_1_8
+	targetCompatibility = JavaVersion.VERSION_1_8
+	//withJavadocJar()
+}
+
+[compileJava, compileTestJava, javadoc]*.options*.encoding = 'UTF-8'
+
+if(JavaVersion.current().isJava8Compatible()) {
+	allprojects {
+		tasks.withType(Javadoc) {
+			options.addStringOption('Xdoclint:none', '-quiet')
+		}
+	}
+}
+
+repositories {
+	jcenter()
+}
+
+dependencies {
+
+	// apache commons
+	api('commons-io:commons-io:2.6')
+	api('org.apache.commons:commons-lang3:3.8.1')
+	api('commons-codec:commons-codec:1.11')
+	
+	// guava
+	//implementation('com.google.guava:guava:28.0-jre')
+	
+	// json
+	api('com.fasterxml.jackson.core:jackson-databind:2.9.9.3')
+	
+	// parser
+	//api('org.jsoup:jsoup:1.9.1')
+	
+	// poi
+	api('org.apache.poi:poi:3.17')
+	api('org.apache.poi:poi-ooxml:3.17')
+	
+	// bouncycastle
+	api('org.bouncycastle:bcprov-jdk15on:1.57')
+	
+}
+
+/*
+task sourcesJar(type: Jar, dependsOn: classes) {
+	classifier = 'sources'
+	from sourceSets.main.allSource
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+	classifier = 'javadoc'
+	from javadoc.destinationDir
+}
+
+artifacts {
+	archives sourcesJar
+	archives javadocJar
+}
+
+// To specify a license in the pom:
+install {
+	repositories.mavenInstaller {
+		pom.project {
+			licenses {
+				license {
+					name 'The Apache Software License, Version 2.0'
+					url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+					distribution 'repo'
+				}
+			}
+		}
+	}
+}
+*/
