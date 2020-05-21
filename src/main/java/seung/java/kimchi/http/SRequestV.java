@@ -41,7 +41,7 @@ public class SRequestV implements Serializable {
 	private List<Pair<String, String>> headers = new ArrayList<Pair<String, String>>();
 	
 	private SCharset                   dataCharset = SCharset.UTF_8;
-	private List<Pair<String, String>> data = new ArrayList<Pair<String, String>>();
+	private List<Pair<String, String>> data        = new ArrayList<Pair<String, String>>();
 	
 	public String getUrl() {
 		return url;

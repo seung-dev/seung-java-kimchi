@@ -16,20 +16,22 @@ public class SResponseV implements Serializable {
 
 	private static final long serialVersionUID = 1505086923422336107L;
 	
-	private String protocol      = "";
-	private String host          = "";
-	private int    port          = -1;
-	private String path          = "";
-	private String query         = "";
+	private String protocol = "";
+	private String host     = "";
+	private int    port     = -1;
+	private String path     = "";
+	private String query    = "";
 	
-	private int                       responseCode         = -1;
-	private String                    responseMessage      = "";
+	private int    responseCode    = -1;
+	private String responseMessage = "";
 	
 	private Map<String, List<String>> responseHeaderFields = new LinkedHashMap<String, List<String>>();
 	private String                    cookie               = "";
 	
-	private byte[] responseBody  = null;
-	private byte[] responseError = null;
+	private long   responseLength  = -1;
+	private String responseCharset = "";
+	private byte[] responseBody    = null;
+	private byte[] responseError   = null;
 	
 	private String exceptionMessage = "";
 	
@@ -90,6 +92,18 @@ public class SResponseV implements Serializable {
 		this.cookie = cookie;
 	}
 	
+	public long getResponseLength() {
+		return responseLength;
+	}
+	public void setResponseLength(long responseLength) {
+		this.responseLength = responseLength;
+	}
+	public String getResponseCharset() {
+		return responseCharset;
+	}
+	public void setResponseCharset(String responseCharset) {
+		this.responseCharset = responseCharset;
+	}
 	public byte[] getResponseBody() {
 		return responseBody;
 	}

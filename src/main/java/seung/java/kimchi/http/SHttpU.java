@@ -276,6 +276,14 @@ public class SHttpU {
 			}
 			
 			if(sResponseV.getResponseCode() == HttpURLConnection.HTTP_OK && sRequestV.doInput() && httpURLConnection.getInputStream() != null) {
+				String contentEncoding = httpURLConnection.getContentEncoding();
+				String contentType     = httpURLConnection.getContentType();
+				sResponseV.setResponseLength(httpURLConnection.getContentLengthLong());
+				if(contentEncoding != null) {
+					sResponseV.setResponseCharset(contentEncoding);
+				} else if(contentType != null && contentType.contains("charset=")) {
+					sResponseV.setResponseCharset(contentType.split("charset=")[1].split(";")[0].trim());
+				}
 				sResponseV.setResponseBody(IOUtils.toByteArray(httpURLConnection.getInputStream()));
 			}
 			
