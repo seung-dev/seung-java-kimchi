@@ -147,14 +147,14 @@ public class SDateU {
 	
 	/**
 	 * <pre>
-	 * default pattern is "yyyy-MM-dd HH:mm:ss.SSS".
+	 * default pattern is "yyyy-MM-dd'T'HH:mm:ss.SSSXXX".
 	 * default date is today.
 	 * default timeZone is "TimeZone.getDefault()".
 	 * </pre>
 	 * @return {@link #getDateString(String, Date, TimeZone)}
 	 */
 	public static String getDateString() {
-		return getDateString("yyyy-MM-dd HH:mm:ss.SSS", new Date(), TimeZone.getDefault());
+		return getDateString("yyyy-MM-dd'T'HH:mm:ss.SSSXXX", new Date(), TimeZone.getDefault());
 	}
 	/**
 	 * <pre>
