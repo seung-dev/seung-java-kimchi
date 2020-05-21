@@ -19,8 +19,11 @@ import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.lang3.StringUtils;
 
+import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializerProvider;
 
 import seung.java.kimchi.util.SCharset;
 
@@ -342,6 +345,12 @@ public class SStringU {
 	 */
 	public static String toJson(Object data, boolean isPretty) throws JsonProcessingException {
 		ObjectMapper objectMapper = new ObjectMapper();
+		objectMapper.getSerializerProvider().setNullKeySerializer(new JsonSerializer<Object>() {
+			@Override
+			public void serialize(Object value, JsonGenerator jsonGenerator, SerializerProvider serializerProvider) throws IOException {
+				jsonGenerator.writeFieldName("");
+			}
+		});
 		if(isPretty) {
 			return objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(data);
 		}
