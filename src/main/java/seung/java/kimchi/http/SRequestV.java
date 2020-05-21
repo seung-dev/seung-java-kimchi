@@ -3,11 +3,12 @@ package seung.java.kimchi.http;
 import java.io.Serializable;
 import java.net.Proxy;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
+
+import org.apache.commons.lang3.tuple.Pair;
 
 import seung.java.kimchi.util.SCharset;
+import seung.java.kimchi.util.SLinkedHashMap;
 
 /**
  * <pre>
@@ -20,29 +21,27 @@ public class SRequestV implements Serializable {
 
 	private static final long serialVersionUID = 4940150854342584532L;
 	
-	private String                    url           = "";
-	private String                    protocol      = "";
-	private String                    host          = "";
-	private int                       port          = -1;
-	private String                    path          = "";
-	private String                    query         = "";
-	private SRequestMethod               requestMethod = SRequestMethod.GET;
+	private String         url           = "";
+	private SRequestMethod requestMethod = SRequestMethod.GET;
 	
-	private Proxy.Type                proxyType     = null;
-	private String                    proxyHostname = null;
-	private int                       proxyPort     = -1;
+	private boolean    useProxy      = false;
+	private Proxy.Type proxyType     = Proxy.Type.HTTP;
+	private String     proxyHostname = "";
+	private int        proxyPort     = -1;
 	
-	private boolean                   doInput  = true;
-	private boolean                   doOutput = false;
+//	private boolean followRedirects = true;
+	private boolean useCache        = false;
 	
-	private int                       connectTimeout = 1000 * 3;
-	private int                       readTimeout    = 1000 * 60;
+	private boolean doInput  = true;
+	private boolean doOutput = false;
 	
-	private Map<String, List<String>> requestProperty = new LinkedHashMap<String, List<String>>();
+	private int connectTimeout = 1000 * 3;
+	private int readTimeout    = 1000 * 60;
 	
-	private String                    formDataString  = "";
-	private SCharset                  formDataCharset = SCharset.UTF_8;
-	private List<String[]>            formData        = new ArrayList<String[]>();
+	private List<Pair<String, String>> headers = new ArrayList<Pair<String, String>>();
+	
+	private SCharset                   dataCharset = SCharset.UTF_8;
+	private List<Pair<String, String>> data = new ArrayList<Pair<String, String>>();
 	
 	public String getUrl() {
 		return url;
@@ -50,36 +49,7 @@ public class SRequestV implements Serializable {
 	public void setUrl(String url) {
 		this.url = url;
 	}
-	public String getProtocol() {
-		return protocol;
-	}
-	public void setProtocol(String protocol) {
-		this.protocol = protocol;
-	}
-	public String getHost() {
-		return host;
-	}
-	public void setHost(String host) {
-		this.host = host;
-	}
-	public int getPort() {
-		return port;
-	}
-	public void setPort(int port) {
-		this.port = port;
-	}
-	public String getPath() {
-		return path;
-	}
-	public void setPath(String path) {
-		this.path = path;
-	}
-	public String getQuery() {
-		return query;
-	}
-	public void setQuery(String query) {
-		this.query = query;
-	}
+	
 	public SRequestMethod getRequestMethod() {
 		return requestMethod;
 	}
@@ -87,6 +57,12 @@ public class SRequestV implements Serializable {
 		this.requestMethod = requestMethod;
 	}
 	
+	public boolean useProxy() {
+		return useProxy;
+	}
+	public void setUseProxy(boolean useProxy) {
+		this.useProxy = useProxy;
+	}
 	public Proxy.Type getProxyType() {
 		return proxyType;
 	}
@@ -106,13 +82,26 @@ public class SRequestV implements Serializable {
 		this.proxyPort = proxyPort;
 	}
 	
-	public boolean getDoInput() {
+//	public boolean followRedirects() {
+//		return followRedirects;
+//	}
+//	public void setFollowRedirects(boolean followRedirects) {
+//		this.followRedirects = followRedirects;
+//	}
+	public boolean useCache() {
+		return useCache;
+	}
+	public void setUseCache(boolean useCache) {
+		this.useCache = useCache;
+	}
+	
+	public boolean doInput() {
 		return doInput;
 	}
 	public void setDoInput(boolean doInput) {
 		this.doInput = doInput;
 	}
-	public boolean getDoOutput() {
+	public boolean doOutput() {
 		return doOutput;
 	}
 	public void setDoOutput(boolean doOutput) {
@@ -132,36 +121,32 @@ public class SRequestV implements Serializable {
 		this.readTimeout = readTimeout;
 	}
 	
-	public Map<String, List<String>> getRequestProperty() {
-		return requestProperty;
+	public List<Pair<String, String>> getHeaders() {
+		return headers;
 	}
-	public void setRequestProperty(Map<String, List<String>> requestProperty) {
-		this.requestProperty = requestProperty;
+	public void setHeaders(List<Pair<String, String>> headers) {
+		this.headers = headers;
 	}
-	public void addRequestProperty(String key, List<String> values) {
-		requestProperty.put(key, values);
+	public void addHeaders(String key, String value) {
+		this.headers.add(Pair.of(key, value));
 	}
 	
-	public String getFormDataString() {
-		return formDataString;
+	public SCharset getDataCharset() {
+		return dataCharset;
 	}
-	public void setFormDataString(String formDataString) {
-		this.formDataString = formDataString;
+	public void setDataCharset(SCharset dataCharset) {
+		this.dataCharset = dataCharset;
 	}
-	public SCharset getFormDataCharset() {
-		return formDataCharset;
+	public List<Pair<String, String>> getData() {
+		return data;
 	}
-	public void setFormDataCharset(SCharset formDataCharset) {
-		this.formDataCharset = formDataCharset;
+	public void addData(String key, String value) {
+		this.data.add(Pair.of(key, value));
 	}
-	public List<String[]> getFormData() {
-		return formData;
-	}
-	public void setFormData(List<String[]> formData) {
-		this.formData = formData;
-	}
-	public void addFormData(String key, String value) {
-		formData.add(new String[] {key, value});
+	public void addData(SLinkedHashMap sLinkedHashMap) {
+		for(String key : sLinkedHashMap.keySet()) {
+			this.data.add(Pair.of(key, sLinkedHashMap.getString(key, "")));
+		}
 	}
 	
 }

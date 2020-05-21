@@ -13,6 +13,8 @@ import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.cert.CertificateException;
+import java.util.List;
+import java.util.Map;
 
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
@@ -21,7 +23,9 @@ import javax.net.ssl.SSLSession;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.apache.commons.lang3.tuple.Pair;
 
 import seung.java.kimchi.util.SCharset;
 
@@ -34,19 +38,6 @@ import seung.java.kimchi.util.SCharset;
  */
 public class SHttpU {
 
-	/**
-	 * @see #http(SRequestV)
-	 * @see #https(SRequestV)
-	 * @param sRequestV {@link seung.java.kimchi.http.SRequestV}
-	 * @return {@link seung.java.kimchi.http.SResponseV}
-	 */
-	public static SResponseV request(SRequestV sRequestV) {
-		if(sRequestV.getUrl().startsWith("https")) {
-			return https(sRequestV);
-		}
-		return http(sRequestV);
-	}
-	
 //	public static SHttpV requestWithFile(SHttpV sHttpVO, String fileFieldName, String fileName, byte[] file) {
 //		
 //		String             boundary           = "----" + SStringU.getUUID();
@@ -154,228 +145,170 @@ public class SHttpU {
 //	}
 	
 	/**
-	 * <pre>
-	 * https request
-	 * </pre>
 	 * @param sRequestV {@link seung.java.kimchi.http.SRequestV}
 	 * @return {@link seung.java.kimchi.http.SResponseV}
 	 */
-	public static SResponseV https(SRequestV sRequestV) {
-		
-		SResponseV sResponseV = new SResponseV();
-		
-		HttpsURLConnection httpsURLConnection = null;
-		try {
-			
-			if(sRequestV.getFormData().size() > 0) {
-				StringBuffer stringBuffer = new StringBuffer();
-				for(String[] formData : sRequestV.getFormData()) {
-					stringBuffer.append("&");
-					stringBuffer.append(formData[0]);
-					stringBuffer.append("=");
-					if(formData[1] != null) {
-						stringBuffer.append(encodeURIComponent(formData[1], sRequestV.getFormDataCharset()));
-					}
-				}
-				sRequestV.setFormDataString(stringBuffer.length() > 0 ? stringBuffer.toString().substring(1) : "");
-			}
-			
-			String urlString = sRequestV.getUrl();
-			if(
-					SRequestMethod.GET == sRequestV.getRequestMethod()
-					&& sRequestV.getFormDataString() != null
-					&& sRequestV.getFormDataString().length() > 0
-					) {
-				String[] urlSplit = sRequestV.getUrl().split("?");
-				urlString = urlSplit.length > 1 ? urlSplit[0] : sRequestV.getUrl();
-				urlString += "?";
-				urlString += sRequestV.getFormDataString();
-				if(urlSplit.length > 1) {
-					urlString += "&";
-					urlString += urlSplit[1];
-				}
-			}
-			URL url = new URL(urlString);
-			
-			sRequestV.setProtocol(url.getProtocol());
-			sRequestV.setHost(url.getHost());
-			sRequestV.setPort(url.getPort() == -1 ? url.getDefaultPort() : url.getPort());
-			sRequestV.setPath(url.getPath());
-			sRequestV.setQuery(url.getQuery());
-			
-			HttpsURLConnection.setDefaultHostnameVerifier(new HostnameVerifier() {
-				@Override
-				public boolean verify(String hostname, SSLSession session) {
-					return true;
-				}
-			});
-			
-			SSLContext sslContext = SSLContext.getInstance("SSL");
-			sslContext.init(
-					null
-					, new TrustManager[] {
-							new X509TrustManager() {
-								@Override
-								public java.security.cert.X509Certificate[] getAcceptedIssuers() {
-									return null;
-								}
-								@Override
-								public void checkServerTrusted(java.security.cert.X509Certificate[] chain, String authType) throws CertificateException {
-									
-								}
-								@Override
-								public void checkClientTrusted(java.security.cert.X509Certificate[] chain, String authType) throws CertificateException {
-								}
-							}
-					}
-					, new SecureRandom()
-					);
-			HttpsURLConnection.setDefaultSSLSocketFactory(sslContext.getSocketFactory());
-			
-			if(sRequestV.getProxyType() != null) {
-				Proxy proxy = new Proxy(sRequestV.getProxyType(), new InetSocketAddress(sRequestV.getProxyHostname(), sRequestV.getProxyPort()));
-				httpsURLConnection = (HttpsURLConnection) url.openConnection(proxy);
-			} else {
-				httpsURLConnection = (HttpsURLConnection) url.openConnection();
-			}
-			httpsURLConnection.setDefaultUseCaches(false);
-			httpsURLConnection.setDoInput(sRequestV.getDoInput());
-			httpsURLConnection.setDoOutput(sRequestV.getDoOutput());
-			httpsURLConnection.setConnectTimeout(sRequestV.getConnectTimeout());
-			httpsURLConnection.setReadTimeout(sRequestV.getReadTimeout());
-			httpsURLConnection.setRequestMethod(sRequestV.getRequestMethod().text());
-			for(String key : sRequestV.getRequestProperty().keySet()) {
-				StringBuffer stringBuffer = new StringBuffer();
-				for(String value : sRequestV.getRequestProperty().get(key)) {
-					stringBuffer.append("; ");
-					stringBuffer.append(value);
-				}
-				httpsURLConnection.setRequestProperty(key, stringBuffer.substring(2));
-			}
-			if(SRequestMethod.POST == sRequestV.getRequestMethod()) {
-				httpsURLConnection.getOutputStream().write(sRequestV.getFormDataString().getBytes(sRequestV.getFormDataCharset().text()));
-				httpsURLConnection.getOutputStream().flush();
-			}
-			
-			sResponseV.setResponseCode(httpsURLConnection.getResponseCode());
-			sResponseV.setResponseMessage(httpsURLConnection.getResponseMessage());
-			sResponseV.setResponseHeaderFields(httpsURLConnection.getHeaderFields());
-			
-			sResponseV.setResultCode("0000");
-			sResponseV.setResultMessage("");
-			
-		} catch (NoSuchAlgorithmException e) {
-			sResponseV.setResultCode("E911");
-			sResponseV.setResultMessage(ExceptionUtils.getStackTrace(e));
-		} catch (KeyManagementException e) {
-			sResponseV.setResultCode("E912");
-			sResponseV.setResultMessage(ExceptionUtils.getStackTrace(e));
-		} catch (MalformedURLException e) {
-			sResponseV.setResultCode("E901");
-			sResponseV.setResultMessage(ExceptionUtils.getStackTrace(e));
-		} catch (IOException e) {
-			sResponseV.setResultCode("E902");
-			sResponseV.setResultMessage(ExceptionUtils.getStackTrace(e));
-		} finally {
-			httpsURLConnection.disconnect();
-		}
-		
-		return sResponseV;
-	}
-	
-	/**
-	 * <pre>
-	 * http request
-	 * </pre>
-	 * @param sRequestV {@link seung.java.kimchi.http.SRequestV}
-	 * @return {@link seung.java.kimchi.http.SResponseV}
-	 */
-	public static SResponseV http(SRequestV sRequestV) {
+	public static SResponseV request(SRequestV sRequestV) {
 		
 		SResponseV sResponseV = new SResponseV();
 		
 		HttpURLConnection httpURLConnection = null;
 		try {
 			
-			if(sRequestV.getFormData().size() > 0) {
-				StringBuffer stringBuffer = new StringBuffer();
-				for(String[] formData : sRequestV.getFormData()) {
-					stringBuffer.append("&");
-					stringBuffer.append(formData[0]);
-					stringBuffer.append("=");
-					if(formData[1] != null) {
-						stringBuffer.append(encodeURIComponent(formData[1], sRequestV.getFormDataCharset()));
-					}
+			URL   url = null;
+			
+			StringBuffer data = new StringBuffer();
+			for(Pair<String, String> pair : sRequestV.getData()) {
+				data.append("&");
+				if(SRequestMethod.GET == sRequestV.getRequestMethod()) {
+					data.append(encodeURIComponent(pair.getLeft(), sRequestV.getDataCharset()));
+				} else {
+					data.append(pair.getLeft());
 				}
-				sRequestV.setFormDataString(stringBuffer.length() > 0 ? stringBuffer.toString().substring(1) : "");
-			}
-			
-			String urlString = sRequestV.getUrl();
-			if(
-					SRequestMethod.GET == sRequestV.getRequestMethod()
-					&& sRequestV.getFormDataString() != null
-					&& sRequestV.getFormDataString().length() > 0
-					) {
-				String[] urlSplit = sRequestV.getUrl().split("?");
-				urlString = urlSplit.length > 1 ? urlSplit[0] : sRequestV.getUrl();
-				urlString += "?";
-				urlString += sRequestV.getFormDataString();
-				if(urlSplit.length > 1) {
-					urlString += "&";
-					urlString += urlSplit[1];
+				data.append("=");
+				if(SRequestMethod.GET == sRequestV.getRequestMethod()) {
+					data.append(encodeURIComponent(pair.getRight(), sRequestV.getDataCharset()));
+				} else {
+					data.append(pair.getRight());
 				}
-			}
-			URL url = new URL(urlString);
+			}// end of data
 			
-			sRequestV.setProtocol(url.getProtocol());
-			sRequestV.setHost(url.getHost());
-			sRequestV.setPort(url.getPort() == -1 ? url.getDefaultPort() : url.getPort());
-			sRequestV.setPath(url.getPath());
-			sRequestV.setQuery(url.getQuery());
-			
-			if(sRequestV.getProxyType() != null) {
-				Proxy proxy = new Proxy(sRequestV.getProxyType(), new InetSocketAddress(sRequestV.getProxyHostname(), sRequestV.getProxyPort()));
-				httpURLConnection = (HttpURLConnection) url.openConnection(proxy);
+			if(SRequestMethod.GET == sRequestV.getRequestMethod() && sRequestV.getData().size() > 0) {
+				String[] divided = sRequestV.getUrl().trim().split("\\?");
+				if(divided.length > 1) {
+					url = new URL(String.format("%s?%s%s", divided[0], divided[1], data.toString()));
+				} else {
+					url = new URL(String.format("%s?%s", divided[0], data.toString().substring(1)));
+				}
 			} else {
-				httpURLConnection = (HttpURLConnection) url.openConnection();
-			}
-			httpURLConnection.setDefaultUseCaches(false);
-			httpURLConnection.setDoInput(sRequestV.getDoInput());
-			httpURLConnection.setDoOutput(sRequestV.getDoOutput());
+				url = new URL(sRequestV.getUrl().trim());
+			}// end of url
+			
+			sResponseV.setProtocol(url.getProtocol());
+			sResponseV.setHost(url.getHost());
+			sResponseV.setPort(url.getPort() == -1 ? url.getDefaultPort() : url.getPort());
+			sResponseV.setPath(url.getPath());
+			if(SRequestMethod.GET == sRequestV.getRequestMethod()) {
+				sResponseV.setQuery(url.getQuery());
+			} else {
+				sResponseV.setQuery(data.toString().substring(1));
+			}// end of query
+			
+			if("http".equals(url.getProtocol())) {
+				
+				if(sRequestV.useProxy()) {
+					Proxy proxy = new Proxy(sRequestV.getProxyType(), new InetSocketAddress(sRequestV.getProxyHostname(), sRequestV.getProxyPort()));
+					httpURLConnection = (HttpURLConnection) url.openConnection(proxy);
+				} else {
+					httpURLConnection = (HttpURLConnection) url.openConnection();
+				}
+				
+			} else if("https".equals(url.getProtocol())) {
+				
+				HttpsURLConnection.setDefaultHostnameVerifier(new HostnameVerifier() {
+					@Override
+					public boolean verify(String hostname, SSLSession session) {
+						return true;
+					}
+				});
+				
+				SSLContext sslContext = SSLContext.getInstance("SSL");
+				sslContext.init(
+						null
+						, new TrustManager[] {
+								new X509TrustManager() {
+									@Override
+									public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+										return null;
+									}
+									@Override
+									public void checkServerTrusted(java.security.cert.X509Certificate[] chain, String authType) throws CertificateException {
+										
+									}
+									@Override
+									public void checkClientTrusted(java.security.cert.X509Certificate[] chain, String authType) throws CertificateException {
+									}
+								}
+						}
+						, new SecureRandom()
+						);
+				HttpsURLConnection.setDefaultSSLSocketFactory(sslContext.getSocketFactory());
+				
+				if(sRequestV.useProxy()) {
+					Proxy proxy = new Proxy(sRequestV.getProxyType(), new InetSocketAddress(sRequestV.getProxyHostname(), sRequestV.getProxyPort()));
+					httpURLConnection = (HttpsURLConnection) url.openConnection(proxy);
+				} else {
+					httpURLConnection = (HttpsURLConnection) url.openConnection();
+				}
+				
+			}// end of httpURLConnection
+			
+//			httpURLConnection.setFollowRedirects(sRequestV.followRedirects());
+			httpURLConnection.setUseCaches(sRequestV.useCache());
+			httpURLConnection.setDoInput(sRequestV.doInput());
+			httpURLConnection.setDoOutput(sRequestV.doOutput());
 			httpURLConnection.setConnectTimeout(sRequestV.getConnectTimeout());
 			httpURLConnection.setReadTimeout(sRequestV.getReadTimeout());
-			httpURLConnection.setRequestMethod(sRequestV.getRequestMethod().text());
-			for(String key : sRequestV.getRequestProperty().keySet()) {
-				StringBuffer stringBuffer = new StringBuffer();
-				for(String value : sRequestV.getRequestProperty().get(key)) {
-					stringBuffer.append("; ");
-					stringBuffer.append(value);
-				}
-				httpURLConnection.setRequestProperty(key, stringBuffer.substring(2));
-			}
-			if(SRequestMethod.POST == sRequestV.getRequestMethod()) {
-				httpURLConnection.getOutputStream().write(sRequestV.getFormDataString().getBytes(sRequestV.getFormDataCharset().text()));
+			
+			for(Pair<String, String> property : sRequestV.getHeaders()) {
+				httpURLConnection.setRequestProperty(property.getLeft(), property.getRight());
+			}// end of property
+			
+			if(SRequestMethod.POST == sRequestV.getRequestMethod() && data.length() > 0) {
+				httpURLConnection.setDoOutput(true);
+				httpURLConnection.getOutputStream().write(data.toString().substring(1).getBytes(sRequestV.getDataCharset().text()));
 				httpURLConnection.getOutputStream().flush();
+				httpURLConnection.getOutputStream().close();
 			}
 			
 			sResponseV.setResponseCode(httpURLConnection.getResponseCode());
 			sResponseV.setResponseMessage(httpURLConnection.getResponseMessage());
-			sResponseV.setResponseHeaderFields(httpURLConnection.getHeaderFields());
+			if(httpURLConnection.getErrorStream() != null) {
+				sResponseV.setResponseError(IOUtils.toByteArray(httpURLConnection.getErrorStream()));
+			}
 			
-			sResponseV.setResultCode("0000");
-			sResponseV.setResultMessage("");
+			Map<String, List<String>> headerFields = httpURLConnection.getHeaderFields();
+			sResponseV.setResponseHeaderFields(headerFields);
+			for(String key : headerFields.keySet()) {
+				if("set-cookie".equals(key == null ? "" : key.toLowerCase())) {
+					sResponseV.setCookie(String.join(";", headerFields.get(key)));
+				}
+			}
+			
+			if(sResponseV.getResponseCode() == HttpURLConnection.HTTP_OK && sRequestV.doInput() && httpURLConnection.getInputStream() != null) {
+				sResponseV.setResponseBody(IOUtils.toByteArray(httpURLConnection.getInputStream()));
+			}
 			
 		} catch (MalformedURLException e) {
-			sResponseV.setResultCode("E901");
-			sResponseV.setResultMessage(ExceptionUtils.getStackTrace(e));
+			sResponseV.setResponseCode(0);
+			sResponseV.setExceptionMessage(ExceptionUtils.getStackTrace(e));
+		} catch (UnsupportedEncodingException e) {
+			sResponseV.setResponseCode(0);
+			sResponseV.setExceptionMessage(ExceptionUtils.getStackTrace(e));
 		} catch (IOException e) {
-			sResponseV.setResultCode("E902");
-			sResponseV.setResultMessage(ExceptionUtils.getStackTrace(e));
+			sResponseV.setResponseCode(0);
+			sResponseV.setExceptionMessage(ExceptionUtils.getStackTrace(e));
+		} catch (NoSuchAlgorithmException e) {
+			sResponseV.setResponseCode(0);
+			sResponseV.setExceptionMessage(ExceptionUtils.getStackTrace(e));
+		} catch (KeyManagementException e) {
+			sResponseV.setResponseCode(0);
+			sResponseV.setExceptionMessage(ExceptionUtils.getStackTrace(e));
 		} finally {
-			httpURLConnection.disconnect();
+			if(httpURLConnection != null) {
+				httpURLConnection.disconnect();
+			}
 		}
 		
+//		if(sRequestV.getUrl().startsWith("https")) {
+//			httpURLConnection = getHttpsURLConnection(sRequestV);
+//		} else {
+//			httpURLConnection = getHttpURLConnection(sRequestV);
+//		}
+//		return http(sRequestV);
+		
 		return sResponseV;
+		
 	}
 	
 	/**
