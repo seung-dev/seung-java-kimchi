@@ -144,8 +144,8 @@ public class SRequestV implements Serializable {
 		this.data.add(Pair.of(key, value));
 	}
 	public void addData(SLinkedHashMap sLinkedHashMap) {
-		for(String key : sLinkedHashMap.keySet()) {
-			this.data.add(Pair.of(key, sLinkedHashMap.getString(key, "")));
+		for(Object key : sLinkedHashMap.keySet()) {
+			this.data.add(Pair.of("" + key, sLinkedHashMap.getString(key, "")));
 		}
 	}
 	

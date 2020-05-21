@@ -2,11 +2,8 @@ package seung.java.kimchi.util;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -28,7 +25,7 @@ import seung.java.kimchi.exception.SCastException;
  * @since 2020.05.11
  */
 @SuppressWarnings("rawtypes")
-public class SLinkedHashMap extends LinkedHashMap<String, Object> {
+public class SLinkedHashMap extends LinkedHashMap {
 
 	private static final long serialVersionUID = -7750824452201675922L;
 	
@@ -44,10 +41,12 @@ public class SLinkedHashMap extends LinkedHashMap<String, Object> {
 	public SLinkedHashMap(String jsonString) throws JsonParseException, JsonMappingException, IOException {
 		this.putAll(objectMapper.readValue(jsonString, Map.class));
 	}
+	@SuppressWarnings("unchecked")
 	public SLinkedHashMap(Object o) {
 		this.putAll(asSLinkedHashMap(o));
 	}
 	
+	@SuppressWarnings("unchecked")
 	public SLinkedHashMap asSLinkedHashMap(Object o) {
 		Field[] fields = o.getClass().getDeclaredFields();
 		try {
@@ -64,25 +63,25 @@ public class SLinkedHashMap extends LinkedHashMap<String, Object> {
 		}
 		return this;
 	}
-	public Object asObject(Object object) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
-		
-		Method[] methods    = null;
-		String   methodName = "";
-		for(String key : this.keySet()) {
-			
-			methodName = "set" + key.substring(0, 1).toUpperCase() + (key.length() > 1 ? key.substring(1) : "");
-			
-			methods = object.getClass().getDeclaredMethods();
-			for(Method method : methods) {
-				if(methodName.equals(method.getName())) {
-					if(this.get(key) != null) method.invoke(object, this.get(key));
-					else method.invoke(object, "");
-				}
-			}
-		}
-		
-		return object;
-	}
+//	public Object asObject(Object object) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+//		
+//		Method[] methods    = null;
+//		String   methodName = "";
+//		for(Object key : this.keySet()) {
+//			
+//			methodName = "set" + key.substring(0, 1).toUpperCase() + (key.length() > 1 ? key.substring(1) : "");
+//			
+//			methods = object.getClass().getDeclaredMethods();
+//			for(Method method : methods) {
+//				if(methodName.equals(method.getName())) {
+//					if(this.get(key) != null) method.invoke(object, this.get(key));
+//					else method.invoke(object, "");
+//				}
+//			}
+//		}
+//		
+//		return object;
+//	}
 	
 	public String toJsonString() throws JsonProcessingException {
 		return toJsonString(false);
@@ -108,30 +107,30 @@ public class SLinkedHashMap extends LinkedHashMap<String, Object> {
 		return putMap(asSLinkedHashMap(o));
 	}
 	
-	public List<String> keyList() {
-		
-		List<String> keyList = new ArrayList<String>();
-		
-		for(String key : this.keySet()) {
-			keyList.add(key);
-		}
-		
-		return keyList;
-	}
+//	public List<String> keyList() {
+//		
+//		List<String> keyList = new ArrayList<String>();
+//		
+//		for(Object key : this.keySet()) {
+//			keyList.add(key);
+//		}
+//		
+//		return keyList;
+//	}
 	
-	public boolean isEqual(String key, Object object) {
+	public boolean isEqual(Object key, Object object) {
 		return get(key) == object;
 	}
 	
-	public boolean isNull(String key) {
+	public boolean isNull(Object key) {
 		return get(key) == null;
 	}
 	
-	public boolean isBlank(String key) {
+	public boolean isBlank(Object key) {
 		return "".equals(getString(key, ""));
 	}
 	
-	public boolean isEmpty(String key) {
+	public boolean isEmpty(Object key) {
 		return isNull(key) && isBlank(key);
 	}
 	
@@ -139,10 +138,10 @@ public class SLinkedHashMap extends LinkedHashMap<String, Object> {
 		return get(key) == null ? defaultValue : get(key);
 	}
 	
-	public String getString(String key) {
+	public String getString(Object key) {
 		return getString(key, null);
 	}
-	public String getString(String key, String defaultValue) {
+	public String getString(Object key, String defaultValue) {
 		Object value = get(key);
 		if(value == null) {
 			return defaultValue;
@@ -164,12 +163,13 @@ public class SLinkedHashMap extends LinkedHashMap<String, Object> {
 		return "" + get(key);
 	}
 	
-	public void appendString(String key, String value) {
+	@SuppressWarnings("unchecked")
+	public void appendString(Object key, String value) {
 		super.put(key, getString(key, "") + value);
 	}
 	
 	@SuppressWarnings("unchecked")
-	public String[] getStringArray(String key) {
+	public String[] getStringArray(Object key) {
 		Object value = get(key);
 		if(value == null) {
 			return null;
@@ -191,7 +191,7 @@ public class SLinkedHashMap extends LinkedHashMap<String, Object> {
 	}
 	
 	@SuppressWarnings("unchecked")
-	public List<String> getStringList(String key) {
+	public List<String> getStringList(Object key) {
 		Object value = get(key);
 		if(value == null) {
 			return null;
@@ -207,12 +207,12 @@ public class SLinkedHashMap extends LinkedHashMap<String, Object> {
 		}
 		return null;
 	}
-	public List<String> addStringList(String key, String value) {
+	public List<String> addStringList(Object key, String value) {
 		getStringList(key).add(value);
 		return getStringList(key);
 	}
 	
-	public int getInt(String key) throws SCastException {
+	public int getInt(Object key) throws SCastException {
 		Object value = get(key);
 		if(value instanceof Integer) {
 			return (int) value;
@@ -225,14 +225,14 @@ public class SLinkedHashMap extends LinkedHashMap<String, Object> {
 		}
 		return Integer.parseInt(getString(key));
 	}
-	public int getInt(String key, int defaultValue) throws SCastException {
+	public int getInt(Object key, int defaultValue) throws SCastException {
 		if(isNull(key)) {
 			return defaultValue;
 		}
 		return getInt(key);
 	}
 	
-	public boolean getBoolean(String key) throws SCastException {
+	public boolean getBoolean(Object key) throws SCastException {
 		String value = getString(key, null);
 		if("true".equals(value)) {
 			return true;
@@ -246,7 +246,7 @@ public class SLinkedHashMap extends LinkedHashMap<String, Object> {
 				));
 	}
 	
-	public double getDouble(String key) throws SCastException {
+	public double getDouble(Object key) throws SCastException {
 		Object value = get(key);
 		if(value instanceof Double) {
 			return (double) value;
@@ -259,14 +259,14 @@ public class SLinkedHashMap extends LinkedHashMap<String, Object> {
 		}
 		return Double.parseDouble(getString(key, null));
 	}
-	public double getDouble(String key, double defaultValue) throws SCastException {
+	public double getDouble(Object key, double defaultValue) throws SCastException {
 		if(isNull(key)) {
 			return defaultValue;
 		}
 		return getDouble(key);
 	}
 	
-	public long getLong(String key) throws SCastException {
+	public long getLong(Object key) throws SCastException {
 		Object value = get(key);
 		if(value instanceof Long) {
 			return (long) value;
@@ -279,14 +279,14 @@ public class SLinkedHashMap extends LinkedHashMap<String, Object> {
 		}
 		return Long.parseLong(getString(key, null));
 	}
-	public long getLong(String key, long defaultValue) throws SCastException {
+	public long getLong(Object key, long defaultValue) throws SCastException {
 		if(isNull(key)) {
 			return defaultValue;
 		}
 		return getLong(key);
 	}
 	
-	public float getFloat(String key) throws SCastException {
+	public float getFloat(Object key) throws SCastException {
 		Object value = get(key);
 		if(value instanceof Float) {
 			return (float) value;
@@ -299,42 +299,42 @@ public class SLinkedHashMap extends LinkedHashMap<String, Object> {
 		}
 		return Float.parseFloat(getString(key, null));
 	}
-	public float getFloat(String key, float defaultValue) throws SCastException {
+	public float getFloat(Object key, float defaultValue) throws SCastException {
 		if(isNull(key)) {
 			return defaultValue;
 		}
 		return getFloat(key);
 	}
 	
-	public BigInteger getBigInteger(String key) throws SCastException {
+	public BigInteger getBigInteger(Object key) throws SCastException {
 		Object value = get(key);
 		if(value instanceof BigInteger) {
 			return (BigInteger) value;
 		}
 		return BigInteger.valueOf(getLong(key));
 	}
-	public BigInteger getBigInteger(String key, BigInteger defaultValue) throws SCastException {
+	public BigInteger getBigInteger(Object key, BigInteger defaultValue) throws SCastException {
 		if(isNull(key)) {
 			return defaultValue;
 		}
 		return getBigInteger(key);
 	}
 	
-	public BigDecimal getBigDecimal(String key) throws SCastException {
+	public BigDecimal getBigDecimal(Object key) throws SCastException {
 		Object value = get(key);
 		if(value instanceof BigDecimal) {
 			return (BigDecimal) value;
 		}
 		return BigDecimal.valueOf(getLong(key));
 	}
-	public BigDecimal getBigDecimal(String key, BigDecimal defaultValue) throws SCastException {
+	public BigDecimal getBigDecimal(Object key, BigDecimal defaultValue) throws SCastException {
 		if(isNull(key)) {
 			return defaultValue;
 		}
 		return getBigDecimal(key);
 	}
 	
-	public Map getMap(String key) throws SCastException {
+	public Map getMap(Object key) throws SCastException {
 		Object value = get(key);
 		if(value == null) {
 			return null;
@@ -348,7 +348,33 @@ public class SLinkedHashMap extends LinkedHashMap<String, Object> {
 				));
 	}
 	
-	public SLinkedHashMap getSMap(String key) throws SCastException {
+	public LinkedHashMap getLinkedHashMap(Object key) throws SCastException {
+		Object value = get(key);
+		if(value == null) {
+			return null;
+		}
+		if(value instanceof LinkedHashMap) {
+			return (LinkedHashMap) value;
+		}
+		throw new SCastException(String.format(
+				"#%s# cannot be cast to LinkedHashMap."
+				, get(key).getClass().getName()
+				));
+	}
+	
+	@SuppressWarnings("unchecked")
+	public List<LinkedHashMap> getListLinkedHashMap(Object key) throws SCastException {
+		try {
+			return (List<LinkedHashMap>) get(key);
+		} catch (Exception e) {
+			throw new SCastException(String.format(
+					"#%s# cannot be cast to List<LinkedHashMap>."
+					, get(key).getClass().getName()
+					));
+		}
+	}
+	
+	public SLinkedHashMap getSLinkedHashMap(Object key) throws SCastException {
 		Object value = get(key);
 		if(value == null) {
 			return null;
@@ -357,24 +383,24 @@ public class SLinkedHashMap extends LinkedHashMap<String, Object> {
 			return (SLinkedHashMap) value;
 		}
 		throw new SCastException(String.format(
-				"#%s# cannot be cast to SMap."
+				"#%s# cannot be cast to SLinkedHashMap."
 				, get(key).getClass().getName()
 				));
 	}
 	
 	@SuppressWarnings("unchecked")
-	public List<SLinkedHashMap> getListSMap(String key) throws SCastException {
+	public List<SLinkedHashMap> getListSLinkedHashMap(Object key) throws SCastException {
 		try {
 			return (List<SLinkedHashMap>) get(key);
 		} catch (Exception e) {
 			throw new SCastException(String.format(
-					"#%s# cannot be cast to List SMap."
+					"#%s# cannot be cast to List<SLinkedHashMap>."
 					, get(key).getClass().getName()
 					));
 		}
 	}
 	
-	public List getList(String key) throws SCastException {
+	public List getList(Object key) throws SCastException {
 		try {
 			return (List) get(key);
 		} catch (Exception e) {

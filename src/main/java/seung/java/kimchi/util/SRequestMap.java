@@ -36,21 +36,24 @@ public class SRequestMap implements Serializable {
 	public SLinkedHashMap getNetwork() {
 		return network;
 	}
-	public void putNetwork(String key, Object value) {
+	@SuppressWarnings("unchecked")
+	public void putNetwork(Object key, Object value) {
 		network.put(key, value);
 	}
 	
 	public SLinkedHashMap getHeader() {
 		return header;
 	}
-	public void putHeader(String key, Object value) {
+	@SuppressWarnings("unchecked")
+	public void putHeader(Object key, Object value) {
 		header.put(key, value);
 	}
 	
 	public SLinkedHashMap getSession() {
 		return session == null ? new SLinkedHashMap() : session;
 	}
-	public void putSession(String key, Object value) {
+	@SuppressWarnings("unchecked")
+	public void putSession(Object key, Object value) {
 		if(session == null) session = new SLinkedHashMap();
 		session.put(key, value);
 	}
@@ -58,15 +61,18 @@ public class SRequestMap implements Serializable {
 	public SLinkedHashMap getData() {
 		return data;
 	}
-	public void putData(String key, Object value) {
+	@SuppressWarnings("unchecked")
+	public void putData(Object key, Object value) {
 		data.put(key, value);
 	}
-	public SLinkedHashMap addData(String key, Object value) {
+	@SuppressWarnings("unchecked")
+	public SLinkedHashMap addData(Object key, Object value) {
 		data.put(key, value);
 		return data;
 	}
-	public SLinkedHashMap addData(SLinkedHashMap sMap) {
-		data.putAll(sMap);
+	@SuppressWarnings("unchecked")
+	public SLinkedHashMap addData(SLinkedHashMap sLinkedHashMap) {
+		data.putAll(sLinkedHashMap);
 		return data;
 	}
 	public SLinkedHashMap addData(String jsonString) throws JsonParseException, JsonMappingException, IOException {
