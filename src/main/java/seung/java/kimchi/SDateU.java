@@ -133,7 +133,7 @@ public class SDateU {
 	 * @throws ParseException
 	 */
 	public static int getDateInteger(String pattern, String yyyyMMdd, TimeZone timeZone) throws ParseException {
-		return getDateInteger(pattern, stringToDate(yyyyMMdd), timeZone);
+		return getDateInteger(pattern, toDate(yyyyMMdd), timeZone);
 	}
 	/**
 	 * @param pattern
@@ -207,7 +207,7 @@ public class SDateU {
 	 * @throws ParseException
 	 */
 	public static String getDateString(String pattern, String yyyyMMdd, TimeZone timeZone) throws ParseException {
-		return getDateString(pattern, stringToDate(yyyyMMdd, "yyyyMMdd", timeZone), timeZone);
+		return getDateString(pattern, toDate(yyyyMMdd, "yyyyMMdd", timeZone), timeZone);
 	}
 	/**
 	 * @see {@link java.text.SimpleDateFormat}
@@ -232,8 +232,20 @@ public class SDateU {
 	 * @return {@link #stringToDate(String, String)}
 	 * @throws ParseException
 	 */
-	public static Date stringToDate(String yyyyMMdd) throws ParseException {
-		return stringToDate(yyyyMMdd, "yyyyMMdd", TimeZone.getDefault());
+	public static Date toDate(String yyyyMMdd) throws ParseException {
+		return toDate(yyyyMMdd, "yyyyMMdd");
+	}
+	/**
+	 * <pre>
+	 * default timeZone is "TimeZone.getDefault()".
+	 * </pre>
+	 * @param dateString
+	 * @param pattern year=yyyy, month=MM, day=dd, hour=HH, minute=mm, second=ss, millisecond=SSS
+	 * @return {@link #stringToDate(String, String)}
+	 * @throws ParseException
+	 */
+	public static Date toDate(String dateString, String pattern) throws ParseException {
+		return toDate(dateString, pattern, TimeZone.getDefault());
 	}
 	/**
 	 * @see {@link java.text.SimpleDateFormat}
@@ -244,7 +256,7 @@ public class SDateU {
 	 * @return
 	 * @throws ParseException
 	 */
-	public static Date stringToDate(String source, String pattern, TimeZone timeZone) throws ParseException {
+	public static Date toDate(String source, String pattern, TimeZone timeZone) throws ParseException {
 		SimpleDateFormat simpleDateFormat = new SimpleDateFormat(pattern);
 		simpleDateFormat.setTimeZone(timeZone);
 		return simpleDateFormat.parse(source);

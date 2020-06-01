@@ -245,6 +245,9 @@ public class SLinkedHashMap extends LinkedHashMap {
 				, getString(key, null)
 				));
 	}
+	public boolean getIntAsBoolen(Object key) throws SCastException {
+		return getInt(key) > 0 ? true : false;
+	}
 	
 	public double getDouble(Object key) throws SCastException {
 		Object value = get(key);
