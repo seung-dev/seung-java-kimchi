@@ -131,7 +131,7 @@ public class SLinkedHashMap extends LinkedHashMap {
 	}
 	
 	public boolean isEmpty(Object key) {
-		return isNull(key) && isBlank(key);
+		return isNull(key) || isBlank(key);
 	}
 	
 	public Object get(Object key, Object defaultValue) {

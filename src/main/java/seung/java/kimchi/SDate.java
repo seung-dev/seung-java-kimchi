@@ -17,8 +17,10 @@ import seung.java.kimchi.util.STimeUnit;
  * @author seung
  * @since 2020.05.11
  */
-public class SDateU {
+public class SDate {
 
+	private SDate() {}
+	
 	/**
 	 * @param from
 	 * @param to

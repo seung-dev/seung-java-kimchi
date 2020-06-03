@@ -34,8 +34,10 @@ import seung.java.kimchi.util.SCharset;
  * @author seung
  * @since 2020.05.11
  */
-public class SStringU {
+public class SString {
 
+	private SString() {}
+	
 	/**
 	 * @param compressed byte array
 	 * @return

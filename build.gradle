@@ -27,6 +27,10 @@ repositories {
 
 dependencies {
 
+	// lombok
+	api('org.projectlombok:lombok:1.18.12')
+	annotationProcessor('org.projectlombok:lombok:1.18.12')
+	
 	// apache commons
 	api('commons-io:commons-io:2.6')
 	api('org.apache.commons:commons-lang3:3.8.1')
@@ -42,6 +46,7 @@ dependencies {
 	
 	// parser
 	//api('org.jsoup:jsoup:1.9.1')
+	
 	
 	// poi
 	api('org.apache.poi:poi:3.17')
