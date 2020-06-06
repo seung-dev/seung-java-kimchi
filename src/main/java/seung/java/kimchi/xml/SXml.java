@@ -15,27 +15,27 @@ import seung.java.kimchi.util.SLinkedHashMap;
 @Getter
 public class SXml {
 
-	private List<String> schema;
-	
-	private List<String> text;
-	
-	private List<SLinkedHashMap> item;
-	
-	public SLinkedHashMap item() {
-		if(!item.isEmpty()) {
-			return item.get(0);
-		}
-		return null;
-	}
-	
-	public String toJsonString(boolean isPretty) throws JsonProcessingException {
-		return new ObjectMapper()
-				.setSerializationInclusion(Include.ALWAYS)
-//				.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false)
-				.configure(SerializationFeature.WRITE_ENUMS_USING_TO_STRING, true)
-				.configure(SerializationFeature.INDENT_OUTPUT, isPretty)
-				.writeValueAsString(this)
-				;
-	}
-	
+    private List<String> schema;
+    
+    private List<String> text;
+    
+    private List<SLinkedHashMap> item;
+    
+    public SLinkedHashMap item() {
+        if(!item.isEmpty()) {
+            return item.get(0);
+        }
+        return null;
+    }
+    
+    public String toJsonString(boolean isPretty) throws JsonProcessingException {
+        return new ObjectMapper()
+                .setSerializationInclusion(Include.ALWAYS)
+//                .configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false)
+                .configure(SerializationFeature.WRITE_ENUMS_USING_TO_STRING, true)
+                .configure(SerializationFeature.INDENT_OUTPUT, isPretty)
+                .writeValueAsString(this)
+                ;
+    }
+    
 }

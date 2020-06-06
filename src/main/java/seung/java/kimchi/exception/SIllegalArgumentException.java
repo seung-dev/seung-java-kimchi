@@ -9,14 +9,14 @@ package seung.java.kimchi.exception;
  */
 public class SIllegalArgumentException extends Exception {
 
-	private static final long serialVersionUID = 1552291746334178040L;
+    private static final long serialVersionUID = 1552291746334178040L;
 
-	public SIllegalArgumentException(String message) {
-		super(message);
-	}
-	
-	public SIllegalArgumentException(String message, Throwable cause) {
-		super(message, cause);
-	}
-	
+    public SIllegalArgumentException(String message) {
+        super(message);
+    }
+    
+    public SIllegalArgumentException(String message, Throwable cause) {
+        super(message, cause);
+    }
+    
 }
