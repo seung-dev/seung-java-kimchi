@@ -24,16 +24,16 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.lang3.tuple.Pair;
-import org.w3c.dom.Document;
 
+import seung.java.kimchi.exception.SKimchiException;
 import seung.java.kimchi.util.SCharset;
 
 /**
  * <pre>
  * http 관련 함수 모음
  * </pre>
+ * 
  * @author seung
  * @since 2020.05.11
  */
@@ -44,8 +44,9 @@ public class SHttp {
     /**
      * @param sRequestV {@link seung.java.kimchi.http.SHttpRequest}
      * @return {@link seung.java.kimchi.http.SHttpResponse}
+     * @throws SKimchiException 
      */
-    public static SHttpResponse request(SHttpRequest sHttpRequest) {
+    public static SHttpResponse request(SHttpRequest sHttpRequest) throws SKimchiException {
         
         SHttpResponse sHttpResponse = SHttpResponse.builder().build();
         
@@ -176,21 +177,16 @@ public class SHttp {
                 sHttpResponse.setResponseBody(IOUtils.toByteArray(httpURLConnection.getInputStream()));
             }
             
-        } catch (MalformedURLException e) {
-            sHttpResponse.setResponseCode(0);
-            sHttpResponse.setExceptionMessage(ExceptionUtils.getStackTrace(e));
         } catch (UnsupportedEncodingException e) {
-            sHttpResponse.setResponseCode(0);
-            sHttpResponse.setExceptionMessage(ExceptionUtils.getStackTrace(e));
+            throw new SKimchiException(e);
+        } catch (MalformedURLException e) {
+            throw new SKimchiException(e);
         } catch (IOException e) {
-            sHttpResponse.setResponseCode(0);
-            sHttpResponse.setExceptionMessage(ExceptionUtils.getStackTrace(e));
+            throw new SKimchiException(e);
         } catch (NoSuchAlgorithmException e) {
-            sHttpResponse.setResponseCode(0);
-            sHttpResponse.setExceptionMessage(ExceptionUtils.getStackTrace(e));
+            throw new SKimchiException(e);
         } catch (KeyManagementException e) {
-            sHttpResponse.setResponseCode(0);
-            sHttpResponse.setExceptionMessage(ExceptionUtils.getStackTrace(e));
+            throw new SKimchiException(e);
         } finally {
             if(httpURLConnection != null) {
                 httpURLConnection.disconnect();
@@ -206,26 +202,31 @@ public class SHttp {
      * </pre>
      * @param data
      * @return {@link #encodeURIComponent(String, SCharset)}
-     * @throws UnsupportedEncodingException
+     * @throws SKimchiException 
      */
-    public static String encodeURIComponent(String data) throws UnsupportedEncodingException {
+    public static String encodeURIComponent(String data) throws SKimchiException {
         return encodeURIComponent(data, SCharset.UTF_8);
     }
     /**
      * @param data
      * @param sCharset {@link seung.java.kimchi.util.SCharset}
      * @return
-     * @throws UnsupportedEncodingException
+     * @throws SKimchiException 
+     * @throws SKimchiException
      */
-    public static String encodeURIComponent(String data, SCharset sCharset) throws UnsupportedEncodingException {
-        return URLEncoder.encode(data, sCharset.text())
-                .replaceAll("\\+"  , "%20")
-                .replaceAll("\\%21", "!")
-                .replaceAll("\\%27", "'")
-                .replaceAll("\\%28", "(")
-                .replaceAll("\\%29", ")")
-                .replaceAll("\\%7E", "~")
-                ;
+    public static String encodeURIComponent(String data, SCharset sCharset) throws SKimchiException {
+        try {
+            return URLEncoder.encode(data, sCharset.text())
+                    .replaceAll("\\+"  , "%20")
+                    .replaceAll("\\%21", "!")
+                    .replaceAll("\\%27", "'")
+                    .replaceAll("\\%28", "(")
+                    .replaceAll("\\%29", ")")
+                    .replaceAll("\\%7E", "~")
+                    ;
+        } catch (UnsupportedEncodingException e) {
+            throw new SKimchiException(e);
+        }
     }
     
     /**
@@ -234,24 +235,23 @@ public class SHttp {
      * </pre>
      * @param data
      * @return {@link #decodeURI(String, SCharset)}
-     * @throws UnsupportedEncodingException
+     * @throws SKimchiException
      */
-    public static String decodeURI(String data) throws UnsupportedEncodingException {
+    public static String decodeURI(String data) throws SKimchiException {
         return decodeURI(data, SCharset.UTF_8);
     }
     /**
      * @param data
      * @param sCharset {@link seung.java.kimchi.util.SCharset}
      * @return
-     * @throws UnsupportedEncodingException
+     * @throws SKimchiException 
      */
-    public static String decodeURI(String data, SCharset sCharset) throws UnsupportedEncodingException {
-        return URLDecoder.decode(data, sCharset.text());
-    }
-    
-    public static Document toDocument(String xml) {
-        return null;
-        
+    public static String decodeURI(String data, SCharset sCharset) throws SKimchiException {
+        try {
+            return URLDecoder.decode(data, sCharset.text());
+        } catch (UnsupportedEncodingException e) {
+            throw new SKimchiException(e);
+        }
     }
     
 }

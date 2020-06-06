@@ -20,6 +20,7 @@ import lombok.NonNull;
 import lombok.Setter;
 import lombok.Singular;
 import lombok.ToString;
+import seung.java.kimchi.exception.SKimchiException;
 import seung.java.kimchi.util.SCharset;
 import seung.java.kimchi.util.SLinkedHashMap;
 
@@ -95,7 +96,7 @@ public class SHttpRequest {
         data.add(Pair.of(key, value));
     }
     
-    public SLinkedHashMap toSLinkedHashMap() throws JsonProcessingException {
+    public SLinkedHashMap toSLinkedHashMap() {
         return new ObjectMapper()
                 .setSerializationInclusion(Include.ALWAYS)
 //                .configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false)
@@ -103,14 +104,18 @@ public class SHttpRequest {
                 ;
     }
     
-    public String toJsonString(boolean isPretty) throws JsonProcessingException {
-        return new ObjectMapper()
-                .setSerializationInclusion(Include.ALWAYS)
+    public String toJsonString(boolean isPretty) throws SKimchiException {
+        try {
+            return new ObjectMapper()
+                    .setSerializationInclusion(Include.ALWAYS)
 //                .configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false)
-                .configure(SerializationFeature.WRITE_ENUMS_USING_TO_STRING, true)
-                .configure(SerializationFeature.INDENT_OUTPUT, isPretty)
-                .writeValueAsString(this)
-                ;
+                    .configure(SerializationFeature.WRITE_ENUMS_USING_TO_STRING, true)
+                    .configure(SerializationFeature.INDENT_OUTPUT, isPretty)
+                    .writeValueAsString(this)
+                    ;
+        } catch (JsonProcessingException e) {
+            throw new SKimchiException(e);
+        }
     }
     
 }

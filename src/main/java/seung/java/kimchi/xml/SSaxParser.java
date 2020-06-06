@@ -12,17 +12,17 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
 
+import seung.java.kimchi.exception.SKimchiException;
 import seung.java.kimchi.exception.SSaxBreakException;
-import seung.java.kimchi.exception.SSaxException;
 
 public class SSaxParser {
 
     private SSaxParser() {}
     
-    public static SXml parseSchema(byte[] data) throws SSaxException {
+    public static SXml parseSchema(byte[] data) throws SKimchiException {
         return parseSchema(new ByteArrayInputStream(data));
     }
-    public static SXml parseSchema(InputStream inputStream) throws SSaxException {
+    public static SXml parseSchema(InputStream inputStream) throws SKimchiException {
         return parse(inputStream, true, false, false, "", -1, -1);
     }
     
@@ -34,7 +34,7 @@ public class SSaxParser {
             , String target
             , int start
             , int end
-            ) throws SSaxException {
+            ) throws SKimchiException {
         return parse(new ByteArrayInputStream(data), isSchema, isText, isItem, target, start, end);
     }
     
@@ -46,7 +46,7 @@ public class SSaxParser {
             , String target
             , int start
             , int end
-            ) throws SSaxException {
+            ) throws SKimchiException {
         
         SXml sXml = null;
         
@@ -58,29 +58,17 @@ public class SSaxParser {
         sSaxDefaultHandler.start(start);
         sSaxDefaultHandler.end(end);
         
-//        SSaxContentHandler sSaxContentHandler = new SSaxContentHandler();
-//        sSaxContentHandler.isSchema(isSchema);
-//        sSaxContentHandler.isText(isText);
-//        sSaxContentHandler.isItem(isItem);
-//        sSaxContentHandler.target(target);
-//        sSaxContentHandler.start(start);
-//        sSaxContentHandler.end(end);
-        
         try {
             
             SAXParserFactory saxParserFactory = SAXParserFactory.newInstance();
             SAXParser saxParser = saxParserFactory.newSAXParser();
             saxParser.parse(inputStream, sSaxDefaultHandler);
             
-//            XMLReader xmlReader = saxParser.getXMLReader();
-//            xmlReader.setContentHandler(sSaxContentHandler);
-//            xmlReader.parse(new InputSource(new ByteArrayInputStream(data)));
-            
         } catch (IOException | SAXException | ParserConfigurationException e) {
             if(e.getCause() instanceof SSaxBreakException) {
                 // no operation
             } else {
-                throw new SSaxException("Failed to parse data.", e);
+                throw new SKimchiException(e);
             }
         } finally {
             sXml = SXml.builder()
@@ -103,7 +91,7 @@ public class SSaxParser {
             , String target
             , int start
             , int end
-            ) throws SSaxException {
+            ) throws SKimchiException {
         
         SXml sXml = null;
         
@@ -127,7 +115,7 @@ public class SSaxParser {
             if(e.getCause() instanceof SSaxBreakException) {
                 // no operation
             } else {
-                throw new SSaxException("Failed to parse data.", e);
+                throw new SKimchiException(e);
             }
         } finally {
             sXml = SXml.builder()

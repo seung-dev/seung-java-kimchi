@@ -11,8 +11,11 @@ import java.security.NoSuchAlgorithmException;
 import java.security.Security;
 import java.util.Set;
 import java.util.UUID;
+import java.util.zip.DataFormatException;
+import java.util.zip.Deflater;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
+import java.util.zip.Inflater;
 
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Base64;
@@ -25,74 +28,158 @@ import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializerProvider;
 
+import seung.java.kimchi.exception.SKimchiException;
 import seung.java.kimchi.util.SCharset;
 
 /**
  * <pre>
  * String 관련 함수 모음
  * </pre>
+ * 
  * @author seung
- * @since 2020.05.11
  */
 public class SString {
 
     private SString() {}
     
-    /**
-     * @param compressed byte array
-     * @return
-     * @throws IOException
-     */
-    public static byte[] decompress(byte[] compressed) throws IOException {
+    public static byte[] inflate(byte[] data) throws SKimchiException {
+        return inflate(data, true);
+    }
+    public static byte[] inflate(byte[] data, boolean nowrap) throws SKimchiException {
         
-        ByteArrayInputStream  byteArrayInputStream  = new ByteArrayInputStream(compressed);
-        GZIPInputStream       gzipInputStream       = new GZIPInputStream(byteArrayInputStream);
-        BufferedInputStream   bufferedInputStream   = new BufferedInputStream(gzipInputStream);
-        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        byte[] inflated = null;
+        
+        Inflater inflater = new Inflater(nowrap);
+        
+        inflater.setInput(data);
         
         byte[] b = new byte[1024];
-        int length;
-        while((length = bufferedInputStream.read(b)) != -1) {
-            byteArrayOutputStream.write(b, 0, length);
+        int len;
+        try (
+                ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+                ) {
+            
+            while(!inflater.finished()) {
+                len = inflater.inflate(b);
+                byteArrayOutputStream.write(b, 0, len);
+            }
+            
+            inflated = byteArrayOutputStream.toByteArray();
+            inflater.end();
+            
+        } catch (IOException e) {
+            throw new SKimchiException(e);
+        } catch (DataFormatException e) {
+            throw new SKimchiException(e);
         }
         
-        byteArrayOutputStream.close();
-        bufferedInputStream.close();
-        gzipInputStream.close();
-        byteArrayInputStream.close();
+        return inflated;
+    }
+    
+    public static byte[] deflate(byte[] data) throws SKimchiException {
+        return deflate(data, Deflater.BEST_COMPRESSION, true);
+    }
+    public static byte[] deflate(byte[] data, int level, boolean nowrap) throws SKimchiException {
         
-        return byteArrayOutputStream.toByteArray();
+        byte[] deflated = null;
+        
+        Deflater deflater = new Deflater(level, nowrap);
+        
+        deflater.setInput(data);
+        deflater.finish();
+        
+        byte[] b = new byte[1024];
+        int len;
+        try (
+                ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+                ) {
+            
+            while(!deflater.finished()) {
+                len = deflater.deflate(b);
+                byteArrayOutputStream.write(b, 0, len);
+            }
+            
+            deflated = byteArrayOutputStream.toByteArray();
+            deflater.end();
+            
+        } catch (IOException e) {
+            throw new SKimchiException(e);
+        }
+        
+        return deflated;
+    }
+    
+    /**
+     * @param compressed byte array
+     * @throws SKimchiException 
+     */
+    public static byte[] decompress(byte[] compressed) throws SKimchiException {
+        
+        byte[] decompressed = null;
+        try (
+                ByteArrayInputStream  byteArrayInputStream  = new ByteArrayInputStream(compressed);
+                GZIPInputStream       gzipInputStream       = new GZIPInputStream(byteArrayInputStream);
+                BufferedInputStream   bufferedInputStream   = new BufferedInputStream(gzipInputStream);
+                ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+                ) {
+            
+            byte[] b = new byte[1024];
+            int length;
+            while((length = bufferedInputStream.read(b)) != -1) {
+                byteArrayOutputStream.write(b, 0, length);
+            }
+            
+            byteArrayOutputStream.close();
+            bufferedInputStream.close();
+            gzipInputStream.close();
+            byteArrayInputStream.close();
+            
+            decompressed = byteArrayOutputStream.toByteArray();
+            
+        } catch (IOException e) {
+            throw new SKimchiException(e);
+        }
+        
+        return decompressed;
     }
     /**
      * @param data
-     * @return
-     * @throws IOException
+     * @throws SKimchiException 
      */
-    public static byte[] compress(byte[] data) throws IOException {
+    public static byte[] compress(byte[] data) throws SKimchiException {
         
-        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-        GZIPOutputStream      gzipOutputStream      = new GZIPOutputStream(byteArrayOutputStream);
-        BufferedOutputStream  bufferedOutputStream  = new BufferedOutputStream(gzipOutputStream);
-        bufferedOutputStream.write(data);
+        byte[] compressed = null;
+        try (
+                ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+                GZIPOutputStream      gzipOutputStream      = new GZIPOutputStream(byteArrayOutputStream);
+                BufferedOutputStream  bufferedOutputStream  = new BufferedOutputStream(gzipOutputStream);
+                ) {
+            
+            bufferedOutputStream.write(data);
+            bufferedOutputStream.close();
+            gzipOutputStream.close();
+            byteArrayOutputStream.close();
+            
+            compressed = byteArrayOutputStream.toByteArray();
+            
+        } catch (IOException e) {
+            throw new SKimchiException(e);
+        }
         
-        bufferedOutputStream.close();
-        gzipOutputStream.close();
-        byteArrayOutputStream.close();
-        
-        return byteArrayOutputStream.toByteArray();
+        return compressed;
     }
     
     /**
      * <pre>
      * default sCharset is {@link seung.java.kimchi.util.SCharset#UTF_8}.
      * </pre>
+     * 
      * @param algorithm {@link #availableDigestAlgorithm}
      * @param data
      * @return {@link #digestToBase64(String, String, SCharset)}
-     * @throws NoSuchAlgorithmException
-     * @throws UnsupportedEncodingException
+     * @throws SKimchiException 
      */
-    public static String digestToBase64(String algorithm, String data) throws NoSuchAlgorithmException, UnsupportedEncodingException {
+    public static String digestToBase64(String algorithm, String data) throws SKimchiException {
         return digestToBase64(algorithm, data, SCharset.UTF_8);
     }
     /**
@@ -100,10 +187,9 @@ public class SString {
      * @param data
      * @param sCharset {@link seung.java.kimchi.util.SCharset}
      * @return {@link #encodeBase64String(byte[])} {@link #digest(String, String, SCharset)}
-     * @throws NoSuchAlgorithmException
-     * @throws UnsupportedEncodingException
+     * @throws SKimchiException 
      */
-    public static String digestToBase64(String algorithm, String data, SCharset sCharset) throws NoSuchAlgorithmException, UnsupportedEncodingException {
+    public static String digestToBase64(String algorithm, String data, SCharset sCharset) throws SKimchiException {
         return encodeBase64String(digest(algorithm, data, sCharset));
     }
     
@@ -112,13 +198,13 @@ public class SString {
      * default sCharset is {@link seung.java.kimchi.util.SCharset#UTF_8}.
      * default toLowerCase is false.
      * </pre>
+     * 
      * @param algorithm {@link #availableDigestAlgorithm}
      * @param data
      * @return {@link #digestToHex(String, String, SCharset, boolean)}
-     * @throws NoSuchAlgorithmException
-     * @throws UnsupportedEncodingException
+     * @throws SKimchiException 
      */
-    public static String digestToHex(String algorithm, String data) throws NoSuchAlgorithmException, UnsupportedEncodingException {
+    public static String digestToHex(String algorithm, String data) throws SKimchiException {
         return digestToHex(algorithm, data, SCharset.UTF_8, false);
     }
     /**
@@ -127,10 +213,9 @@ public class SString {
      * @param sCharset {@link seung.java.kimchi.util.SCharset}
      * @param toLowerCase
      * @return {@link #encodeHexString(byte[], boolean)} {@link #digest(String, String, SCharset)}
-     * @throws NoSuchAlgorithmException
-     * @throws UnsupportedEncodingException
+     * @throws SKimchiException 
      */
-    public static String digestToHex(String algorithm, String data, SCharset sCharset, boolean toLowerCase) throws NoSuchAlgorithmException, UnsupportedEncodingException {
+    public static String digestToHex(String algorithm, String data, SCharset sCharset, boolean toLowerCase) throws SKimchiException {
         return encodeHexString(digest(algorithm, data, sCharset), toLowerCase);
     }
     
@@ -138,13 +223,12 @@ public class SString {
      * <pre>
      * default sCharset is {@link seung.java.kimchi.util.SCharset#UTF_8}.
      * </pre>
+     * 
      * @param algorithm {@link #availableDigestAlgorithm}
      * @param data
-     * @return
-     * @throws NoSuchAlgorithmException
-     * @throws UnsupportedEncodingException
+     * @throws SKimchiException 
      */
-    public static byte[] digest(String algorithm, String data) throws NoSuchAlgorithmException, UnsupportedEncodingException {
+    public static byte[] digest(String algorithm, String data) throws SKimchiException {
         return digest(algorithm, data, SCharset.UTF_8);
     }
     /**
@@ -152,27 +236,33 @@ public class SString {
      * @param data
      * @param sCharset {@link seung.java.kimchi.util.SCharset}
      * @return {@link #digest(String, byte[])}
-     * @throws NoSuchAlgorithmException
-     * @throws UnsupportedEncodingException
+     * @throws SKimchiException 
      */
-    public static byte[] digest(String algorithm, String data, SCharset sCharset) throws NoSuchAlgorithmException, UnsupportedEncodingException {
-        return digest(algorithm, data.getBytes(sCharset.text()));
+    public static byte[] digest(String algorithm, String data, SCharset sCharset) throws SKimchiException {
+        try {
+            return digest(algorithm, data.getBytes(sCharset.text()));
+        } catch (UnsupportedEncodingException e) {
+            throw new SKimchiException(e);
+        }
     }
     /**
      * @param algorithm {@link #availableDigestAlgorithm}
      * @param data
-     * @return
-     * @throws NoSuchAlgorithmException
-     * @throws UnsupportedEncodingException
+     * @throws SKimchiException 
      */
-    public static byte[] digest(String algorithm, byte[] data) throws NoSuchAlgorithmException, UnsupportedEncodingException {
-        MessageDigest messageDigest = MessageDigest.getInstance(algorithm);
-        return messageDigest.digest(data);
+    public static byte[] digest(String algorithm, byte[] data) throws SKimchiException {
+        try {
+            MessageDigest messageDigest = MessageDigest.getInstance(algorithm);
+            return messageDigest.digest(data);
+        } catch (NoSuchAlgorithmException e) {
+            throw new SKimchiException(e);
+        }
     }
     /**
      * <pre>
      * could add providers like "Security.addProvider(new BouncyCastleProvider())".
      * </pre>
+     * 
      * @return "SHA-384", "SHA-224", "SHA-256", "MD2", "SHA", "SHA-512", "MD5"
      */
     public static Set<String> availableDigestAlgorithm() {
@@ -182,10 +272,9 @@ public class SString {
     /**
      * @param data
      * @param sCharset {@link seung.java.kimchi.util.SCharset}
-     * @return
-     * @throws UnsupportedEncodingException
+     * @throws SKimchiException 
      */
-    public static String[] encodeBinary(String data, SCharset sCharset) throws UnsupportedEncodingException {
+    public static String[] encodeBinary(String data, SCharset sCharset) throws SKimchiException {
         int[]    decimalArray      = encodeDecimal(data, sCharset);
         String[] binaryStringArray = new String[decimalArray.length];
         for(int i = 0; i < binaryStringArray.length; i++) {
@@ -197,11 +286,10 @@ public class SString {
     /**
      * @param data
      * @param sCharset {@link seung.java.kimchi.util.SCharset}
-     * @return
-     * @throws UnsupportedEncodingException
+     * @throws SKimchiException 
      */
-    public static int[] encodeDecimal(String data, SCharset sCharset) throws UnsupportedEncodingException {
-        String hexString    = encodeHexString(data, sCharset, false);
+    public static int[] encodeDecimal(String data, SCharset sCharset) throws SKimchiException {
+        String hexString = encodeHexString(data, sCharset, false);
         int[]  decimalArray = new int[hexString.length() / 2];
         for(int i = 0; i < decimalArray.length; i++) {
             decimalArray[i] = Integer.parseInt(hexString.substring(i * 2, i * 2 + 2), 16);
@@ -213,15 +301,19 @@ public class SString {
      * @param base64String
      * @param sCharset {@link seung.java.kimchi.util.SCharset}
      * @return {@link #decodeBase64(String)}
+     * @throws SKimchiException 
      * @throws UnsupportedEncodingException
      */
-    public static String decodeBase64(String base64String, SCharset sCharset) throws UnsupportedEncodingException {
-        return new String(decodeBase64(base64String), sCharset.text());
+    public static String decodeBase64(String base64String, SCharset sCharset) throws SKimchiException {
+        try {
+            return new String(decodeBase64(base64String), sCharset.text());
+        } catch (UnsupportedEncodingException e) {
+            throw new SKimchiException(e);
+        }
     }
     /**
      * @see org.apache.commons.codec.binary.Base64#decodeBase64(String)
      * @param base64String
-     * @return
      */
     public static byte[] decodeBase64(String base64String) {
         return Base64.decodeBase64(base64String);
@@ -231,15 +323,18 @@ public class SString {
      * @param data
      * @param sCharset {@link seung.java.kimchi.util.SCharset}
      * @return {@link #encodeBase64String(byte[])}
-     * @throws UnsupportedEncodingException
+     * @throws SKimchiException 
      */
-    public static String encodeBase64String(String data, SCharset sCharset) throws UnsupportedEncodingException {
-        return encodeBase64String(data.getBytes(sCharset.text()));
+    public static String encodeBase64String(String data, SCharset sCharset) throws SKimchiException {
+        try {
+            return encodeBase64String(data.getBytes(sCharset.text()));
+        } catch (UnsupportedEncodingException e) {
+            throw new SKimchiException(e);
+        }
     }
     /**
      * @see org.apache.commons.codec.binary.Base64#encodeBase64String(byte[])
      * @param binaryData
-     * @return
      */
     public static String encodeBase64String(byte[] binaryData) {
         return Base64.encodeBase64String(binaryData);
@@ -249,20 +344,26 @@ public class SString {
      * @param data
      * @param sCharset {@link seung.java.kimchi.util.SCharset}
      * @return {@link #decodeHex(String)}
-     * @throws DecoderException
-     * @throws UnsupportedEncodingException
+     * @throws SKimchiException 
      */
-    public static String decodeHex(String data, SCharset sCharset) throws DecoderException, UnsupportedEncodingException {
-        return new String(decodeHex(data), sCharset.text());
+    public static String decodeHex(String data, SCharset sCharset) throws SKimchiException {
+        try {
+            return new String(decodeHex(data), sCharset.text());
+        } catch (UnsupportedEncodingException e) {
+            throw new SKimchiException(e);
+        }
     }
     /**
      * @see org.apache.commons.codec.binary.Hex#decodeHex(String)
      * @param data
-     * @return
-     * @throws DecoderException
+     * @throws SKimchiException 
      */
-    public static byte[] decodeHex(String data) throws DecoderException {
-        return Hex.decodeHex(data);
+    public static byte[] decodeHex(String data) throws SKimchiException {
+        try {
+            return Hex.decodeHex(data);
+        } catch (DecoderException e) {
+            throw new SKimchiException(e);
+        }
     }
     
     /**
@@ -270,16 +371,19 @@ public class SString {
      * @param sCharset {@link seung.java.kimchi.util.SCharset}
      * @param toLowerCase
      * @return {@link #encodeHexString(byte[], boolean)}
-     * @throws UnsupportedEncodingException
+     * @throws SKimchiException 
      */
-    public static String encodeHexString(String data, SCharset sCharset, boolean toLowerCase) throws UnsupportedEncodingException {
-        return encodeHexString(data.getBytes(sCharset.text()), toLowerCase);
+    public static String encodeHexString(String data, SCharset sCharset, boolean toLowerCase) throws SKimchiException {
+        try {
+            return encodeHexString(data.getBytes(sCharset.text()), toLowerCase);
+        } catch (UnsupportedEncodingException e) {
+            throw new SKimchiException(e);
+        }
     }
     /**
      * @see org.apache.commons.codec.binary.Hex#encodeHexString(byte[], boolean)
      * @param data
      * @param toLowerCase
-     * @return
      */
     public static String encodeHexString(byte[] data, boolean toLowerCase) {
         return Hex.encodeHexString(data, toLowerCase);
@@ -289,9 +393,9 @@ public class SString {
      * <pre>
      * default padChar is blank.
      * </pre>
+     * 
      * @param data
      * @param maxLength
-     * @return
      */
     public static String padRight(String data, int maxLength) {
         return String.format("%" + maxLength + "s", data);
@@ -300,7 +404,6 @@ public class SString {
      * @param data
      * @param maxLength
      * @param padChar
-     * @return
      */
     public static String padRight(String data, int maxLength, String padChar) {
         return String.format("%" + maxLength + "s", data).replace(" ", padChar);
@@ -309,9 +412,9 @@ public class SString {
      * <pre>
      * default padChar is blank.
      * </pre>
+     * 
      * @param data
      * @param maxLength
-     * @return
      */
     public static String padLeft(String data, int maxLength) {
         return String.format("%-" + maxLength + "s", data);
@@ -320,7 +423,6 @@ public class SString {
      * @param data
      * @param maxLength
      * @param padChar
-     * @return
      */
     public static String padLeft(String data, int maxLength, String padChar) {
         return String.format("%-" + maxLength + "s", data).replace(" ", padChar);
@@ -330,11 +432,12 @@ public class SString {
      * <pre>
      * default isPretty is false.
      * </pre>
+     * 
      * @param data
      * @return {@link #toJson(Object, boolean)}
-     * @throws JsonProcessingException
+     * @throws SKimchiException 
      */
-    public static String toJson(Object data) throws JsonProcessingException {
+    public static String toJson(Object data) throws SKimchiException {
         return toJson(data, false);
     }
     /**
@@ -342,28 +445,30 @@ public class SString {
      * @see com.fasterxml.jackson.databind.ObjectMapper#writeValueAsString(Object)
      * @param data
      * @param isPretty
-     * @return
-     * @throws JsonProcessingException
+     * @throws SKimchiException 
      */
-    public static String toJson(Object data, boolean isPretty) throws JsonProcessingException {
-        ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.getSerializerProvider().setNullKeySerializer(new JsonSerializer<Object>() {
-            @Override
-            public void serialize(Object value, JsonGenerator jsonGenerator, SerializerProvider serializerProvider) throws IOException {
-                jsonGenerator.writeFieldName("");
+    public static String toJson(Object data, boolean isPretty) throws SKimchiException {
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            objectMapper.getSerializerProvider().setNullKeySerializer(new JsonSerializer<Object>() {
+                @Override
+                public void serialize(Object value, JsonGenerator jsonGenerator, SerializerProvider serializerProvider) throws IOException {
+                    jsonGenerator.writeFieldName("");
+                }
+            });
+            if(isPretty) {
+                return objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(data);
             }
-        });
-        if(isPretty) {
-            return objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(data);
+            return objectMapper.writeValueAsString(data);
+        } catch (JsonProcessingException e) {
+            throw new SKimchiException(e);
         }
-        return objectMapper.writeValueAsString(data);
     }
     
     /**
      * @see org.apache.commons.lang3.StringUtils#repeat(String, int)
      * @param data
      * @param repeat
-     * @return
      */
     public static String repeat(String data, int repeat) {
         return StringUtils.repeat(data, repeat);

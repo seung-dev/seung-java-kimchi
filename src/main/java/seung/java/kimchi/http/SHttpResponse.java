@@ -17,6 +17,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import seung.java.kimchi.exception.SKimchiException;
 import seung.java.kimchi.util.SLinkedHashMap;
 
 /**
@@ -38,8 +39,6 @@ public class SHttpResponse {
     
     @JsonIgnore
     private byte[] responseError;
-    
-    private String exceptionMessage;
     
     private String protocol;
     
@@ -65,7 +64,7 @@ public class SHttpResponse {
     @JsonIgnore
     private byte[] responseBody;
     
-    public SLinkedHashMap toSLinkedHashMap() throws JsonProcessingException {
+    public SLinkedHashMap toSLinkedHashMap() {
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.getSerializerProvider().setNullKeySerializer(new JsonSerializer<Object>() {
             @Override
@@ -80,7 +79,7 @@ public class SHttpResponse {
                 ;
     }
     
-    public String toJsonString(boolean isPretty) throws JsonProcessingException {
+    public String toJsonString(boolean isPretty) throws SKimchiException {
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.getSerializerProvider().setNullKeySerializer(new JsonSerializer<Object>() {
             @Override
@@ -88,13 +87,17 @@ public class SHttpResponse {
                 jsonGenerator.writeFieldName("");
             }
         });
-        return objectMapper
-                .setSerializationInclusion(Include.ALWAYS)
+        try {
+            return objectMapper
+                    .setSerializationInclusion(Include.ALWAYS)
 //                .configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false)
-                .configure(SerializationFeature.WRITE_ENUMS_USING_TO_STRING, true)
-                .configure(SerializationFeature.INDENT_OUTPUT, isPretty)
-                .writeValueAsString(this)
-                ;
+                    .configure(SerializationFeature.WRITE_ENUMS_USING_TO_STRING, true)
+                    .configure(SerializationFeature.INDENT_OUTPUT, isPretty)
+                    .writeValueAsString(this)
+                    ;
+        } catch (JsonProcessingException e) {
+            throw new SKimchiException(e);
+        }
     }
     
 }

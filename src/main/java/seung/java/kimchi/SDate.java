@@ -8,14 +8,15 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang3.time.DateUtils;
 
+import seung.java.kimchi.exception.SKimchiException;
 import seung.java.kimchi.util.STimeUnit;
 
 /**
  * <pre>
  * Date 관련 함수 모음
  * </pre>
+ * 
  * @author seung
- * @since 2020.05.11
  */
 public class SDate {
 
@@ -25,7 +26,6 @@ public class SDate {
      * @param from
      * @param to
      * @param sTimeUnit {@link seung.java.kimchi.util.STimeUnit}
-     * @return
      */
     public static String dateDiff(Date from, Date to, STimeUnit sTimeUnit) {
         
@@ -58,10 +58,8 @@ public class SDate {
      * @param date
      * @param sTimeUnit {@link seung.java.kimchi.util.STimeUnit}
      * @param amount
-     * @return
-     * @throws ParseException
      */
-    public static Date addDate(Date date, STimeUnit sTimeUnit, int amount) throws ParseException {
+    public static Date addDate(Date date, STimeUnit sTimeUnit, int amount) {
         
         Date addedDate = null;
         
@@ -98,14 +96,12 @@ public class SDate {
     }
     
     /**
-     * @return
      */
     public static int getDateInteger() {
         return Integer.parseInt(getDateString("yyyyMMdd", new Date()).replaceAll("[^0-9]", ""));
     }
     /**
      * @param pattern
-     * @return
      */
     public static int getDateInteger(String pattern) {
         return Integer.parseInt(getDateString(pattern, new Date()).replaceAll("[^0-9]", ""));
@@ -113,16 +109,14 @@ public class SDate {
     /**
      * @param pattern
      * @param yyyyMMdd
-     * @return
-     * @throws ParseException
+     * @throws SKimchiException 
      */
-    public static int getDateInteger(String pattern, String yyyyMMdd) throws ParseException {
+    public static int getDateInteger(String pattern, String yyyyMMdd) throws SKimchiException {
         return getDateInteger(pattern, yyyyMMdd, TimeZone.getDefault());
     }
     /**
      * @param pattern
      * @param date
-     * @return
      */
     public static int getDateInteger(String pattern, Date date) {
         return Integer.parseInt(getDateString(pattern, date, TimeZone.getDefault()).replaceAll("[^0-9]", ""));
@@ -131,17 +125,15 @@ public class SDate {
      * @param pattern
      * @param yyyyMMdd
      * @param timeZone
-     * @return
-     * @throws ParseException
+     * @throws SKimchiException 
      */
-    public static int getDateInteger(String pattern, String yyyyMMdd, TimeZone timeZone) throws ParseException {
+    public static int getDateInteger(String pattern, String yyyyMMdd, TimeZone timeZone) throws SKimchiException {
         return getDateInteger(pattern, toDate(yyyyMMdd), timeZone);
     }
     /**
      * @param pattern
      * @param date
      * @param timeZone
-     * @return
      */
     public static int getDateInteger(String pattern, Date date, TimeZone timeZone) {
         return Integer.parseInt(getDateString(pattern, date, timeZone).replaceAll("[^0-9]", ""));
@@ -153,6 +145,7 @@ public class SDate {
      * default date is today.
      * default timeZone is "TimeZone.getDefault()".
      * </pre>
+     * 
      * @return {@link #getDateString(String, Date, TimeZone)}
      */
     public static String getDateString() {
@@ -163,6 +156,7 @@ public class SDate {
      * default date is today.
      * default timeZone is "TimeZone.getDefault()".
      * </pre>
+     * 
      * @param pattern
      * @return
      */
@@ -173,21 +167,21 @@ public class SDate {
      * <pre>
      * default timeZone is "TimeZone.getDefault()".
      * </pre>
+     * 
      * @param pattern
      * @param yyyyMMdd
-     * @return
-     * @throws ParseException
+     * @throws SKimchiException 
      */
-    public static String getDateString(String pattern, String yyyyMMdd) throws ParseException {
+    public static String getDateString(String pattern, String yyyyMMdd) throws SKimchiException {
         return getDateString(pattern, yyyyMMdd, TimeZone.getDefault());
     }
     /**
      * <pre>
      * default timeZone is "TimeZone.getDefault()".
      * </pre>
+     * 
      * @param pattern
      * @param date
-     * @return
      */
     public static String getDateString(String pattern, Date date) {
         return getDateString(pattern, date, TimeZone.getDefault());
@@ -196,7 +190,6 @@ public class SDate {
      * @param pattern
      * @param date
      * @param timeZone
-     * @return
      */
     public static String getDateString(String pattern, Date date, String timeZone) {
         return getDateString(pattern, date, TimeZone.getTimeZone(timeZone));
@@ -205,10 +198,9 @@ public class SDate {
      * @param pattern
      * @param yyyyMMdd
      * @param timeZone
-     * @return
-     * @throws ParseException
+     * @throws SKimchiException 
      */
-    public static String getDateString(String pattern, String yyyyMMdd, TimeZone timeZone) throws ParseException {
+    public static String getDateString(String pattern, String yyyyMMdd, TimeZone timeZone) throws SKimchiException {
         return getDateString(pattern, toDate(yyyyMMdd, "yyyyMMdd", timeZone), timeZone);
     }
     /**
@@ -217,7 +209,6 @@ public class SDate {
      * @param pattern year=yyyy, month=MM, day=dd, hour=HH, minute=mm, second=ss, millisecond=SSS
      * @param date
      * @param timeZone {@link java.util.TimeZone}
-     * @return
      */
     public static String getDateString(String pattern, Date date, TimeZone timeZone) {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat(pattern);
@@ -230,23 +221,25 @@ public class SDate {
      * default pattern is "yyyyMMdd".
      * default timeZone is "TimeZone.getDefault()".
      * </pre>
+     * 
      * @param yyyyMMdd
      * @return {@link #stringToDate(String, String)}
-     * @throws ParseException
+     * @throws SKimchiException 
      */
-    public static Date toDate(String yyyyMMdd) throws ParseException {
+    public static Date toDate(String yyyyMMdd) throws SKimchiException {
         return toDate(yyyyMMdd, "yyyyMMdd");
     }
     /**
      * <pre>
      * default timeZone is "TimeZone.getDefault()".
      * </pre>
+     * 
      * @param dateString
      * @param pattern year=yyyy, month=MM, day=dd, hour=HH, minute=mm, second=ss, millisecond=SSS
      * @return {@link #stringToDate(String, String)}
-     * @throws ParseException
+     * @throws SKimchiException 
      */
-    public static Date toDate(String dateString, String pattern) throws ParseException {
+    public static Date toDate(String dateString, String pattern) throws SKimchiException {
         return toDate(dateString, pattern, TimeZone.getDefault());
     }
     /**
@@ -255,18 +248,20 @@ public class SDate {
      * @param source
      * @param pattern year=yyyy, month=MM, day=dd, hour=HH, minute=mm, second=ss, millisecond=SSS
      * @param timeZone {@link java.util.TimeZone}
-     * @return
-     * @throws ParseException
+     * @throws SKimchiException 
      */
-    public static Date toDate(String source, String pattern, TimeZone timeZone) throws ParseException {
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat(pattern);
-        simpleDateFormat.setTimeZone(timeZone);
-        return simpleDateFormat.parse(source);
+    public static Date toDate(String source, String pattern, TimeZone timeZone) throws SKimchiException {
+        try {
+            SimpleDateFormat simpleDateFormat = new SimpleDateFormat(pattern);
+            simpleDateFormat.setTimeZone(timeZone);
+            return simpleDateFormat.parse(source);
+        } catch (ParseException e) {
+            throw new SKimchiException(e);
+        }
     }
     
     /**
      * @see {@link java.util.TimeZone#getAvailableIDs()}
-     * @return
      */
     public static String[] getAvailableTimeZoneIDs() {
         return TimeZone.getAvailableIDs();
@@ -275,7 +270,6 @@ public class SDate {
     /**
      * @see {@link java.util.TimeZone#getDefault()}
      * @see {@link java.util.TimeZone#getID()}
-     * @return
      */
     public static String getCurrentTimeZone() {
         return TimeZone.getDefault().getID();

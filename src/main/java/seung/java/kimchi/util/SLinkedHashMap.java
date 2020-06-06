@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -16,6 +17,7 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import seung.java.kimchi.exception.SCastException;
+import seung.java.kimchi.exception.SKimchiException;
 
 /**
  * <pre>
@@ -29,8 +31,6 @@ public class SLinkedHashMap extends LinkedHashMap {
 
     private static final long serialVersionUID = -7750824452201675922L;
     
-    private ObjectMapper objectMapper = new ObjectMapper();
-    
     public SLinkedHashMap() {
     }
     @SuppressWarnings("unchecked")
@@ -38,8 +38,16 @@ public class SLinkedHashMap extends LinkedHashMap {
         this.putAll(m);
     }
     @SuppressWarnings("unchecked")
-    public SLinkedHashMap(String jsonString) throws JsonParseException, JsonMappingException, IOException {
-        this.putAll(objectMapper.readValue(jsonString, Map.class));
+    public SLinkedHashMap(String jsonString) throws SKimchiException {
+        try {
+            this.putAll(new ObjectMapper().readValue(jsonString, Map.class));
+        } catch (JsonParseException e) {
+            throw new SKimchiException(e);
+        } catch (JsonMappingException e) {
+            throw new SKimchiException(e);
+        } catch (IOException e) {
+            throw new SKimchiException(e);
+        }
     }
     @SuppressWarnings("unchecked")
     public SLinkedHashMap(Object o) {
@@ -63,34 +71,19 @@ public class SLinkedHashMap extends LinkedHashMap {
         }
         return this;
     }
-//    public Object asObject(Object object) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
-//        
-//        Method[] methods    = null;
-//        String   methodName = "";
-//        for(Object key : this.keySet()) {
-//            
-//            methodName = "set" + key.substring(0, 1).toUpperCase() + (key.length() > 1 ? key.substring(1) : "");
-//            
-//            methods = object.getClass().getDeclaredMethods();
-//            for(Method method : methods) {
-//                if(methodName.equals(method.getName())) {
-//                    if(this.get(key) != null) method.invoke(object, this.get(key));
-//                    else method.invoke(object, "");
-//                }
-//            }
-//        }
-//        
-//        return object;
-//    }
     
-    public String toJsonString() throws JsonProcessingException {
+    public String toJsonString() throws SKimchiException {
         return toJsonString(false);
     }
-    public String toJsonString(boolean isPretty) throws JsonProcessingException {
-        if(isPretty) {
-            return objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(this);
+    public String toJsonString(boolean isPretty) throws SKimchiException {
+        try {
+            if(isPretty) {
+                return new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(this);
+            }
+            return new ObjectMapper().writeValueAsString(this);
+        } catch (JsonProcessingException e) {
+            throw new SKimchiException(e);
         }
-        return objectMapper.writeValueAsString(this);
     }
     
     @SuppressWarnings("unchecked")
@@ -99,24 +92,32 @@ public class SLinkedHashMap extends LinkedHashMap {
         return this;
     }
     
-    public SLinkedHashMap putJsonString(String jsonString) throws JsonParseException, JsonMappingException, IOException {
-        return putMap(objectMapper.readValue(jsonString, Map.class));
+    public SLinkedHashMap putJsonString(String jsonString) throws SKimchiException {
+        try {
+            return putMap(new ObjectMapper().readValue(jsonString, Map.class));
+        } catch (JsonParseException e) {
+            throw new SKimchiException(e);
+        } catch (JsonMappingException e) {
+            throw new SKimchiException(e);
+        } catch (IOException e) {
+            throw new SKimchiException(e);
+        }
     }
     
     public SLinkedHashMap putObject(Object o) {
         return putMap(asSLinkedHashMap(o));
     }
     
-//    public List<String> keyList() {
-//        
-//        List<String> keyList = new ArrayList<String>();
-//        
-//        for(Object key : this.keySet()) {
-//            keyList.add(key);
-//        }
-//        
-//        return keyList;
-//    }
+    public List<String> keyList() {
+        
+        List<String> keyList = new ArrayList<>();
+        
+        for(Object key : this.keySet()) {
+            keyList.add(key == null ? "" : "" + key);
+        }
+        
+        return keyList;
+    }
     
     public boolean isEqual(Object key, Object object) {
         return get(key) == object;
@@ -212,27 +213,29 @@ public class SLinkedHashMap extends LinkedHashMap {
         return getStringList(key);
     }
     
-    public int getInt(Object key) throws SCastException {
+    public int getInt(Object key) throws SKimchiException {
         Object value = get(key);
         if(value instanceof Integer) {
             return (int) value;
         }
         if(!Pattern.matches("[0-9]+", getString(key, ""))) {
-            throw new SCastException(String.format(
-                    "#%s# cannot be cast to int."
-                    , getString(key, null)
-                    ));
+            throw new SKimchiException(
+                    new SCastException(String.format(
+                            "#%s# cannot be cast to int."
+                            , getString(key, null)
+                            ))
+                    );
         }
         return Integer.parseInt(getString(key));
     }
-    public int getInt(Object key, int defaultValue) throws SCastException {
+    public int getInt(Object key, int defaultValue) throws SKimchiException {
         if(isNull(key)) {
             return defaultValue;
         }
         return getInt(key);
     }
     
-    public boolean getBoolean(Object key) throws SCastException {
+    public boolean getBoolean(Object key) throws SKimchiException {
         String value = getString(key, null);
         if("true".equals(value)) {
             return true;
@@ -240,104 +243,112 @@ public class SLinkedHashMap extends LinkedHashMap {
         if("false".equals(value)) {
             return false;
         }
-        throw new SCastException(String.format(
-                "#%s# cannot be cast to boolean."
-                , getString(key, null)
-                ));
+        throw new SKimchiException(
+                new SCastException(String.format(
+                        "#%s# cannot be cast to boolean."
+                        , getString(key, null)
+                        ))
+                );
     }
-    public boolean getIntAsBoolen(Object key) throws SCastException {
+    public boolean getIntAsBoolen(Object key) throws SKimchiException {
         return getInt(key) > 0 ? true : false;
     }
     
-    public double getDouble(Object key) throws SCastException {
+    public double getDouble(Object key) throws SKimchiException {
         Object value = get(key);
         if(value instanceof Double) {
             return (double) value;
         }
         if(!Pattern.matches("[0-9.]+", getString(key, ""))) {
-            throw new SCastException(String.format(
-                    "#%s# cannot be cast to double."
-                    , getString(key, null)
-                    ));
+            throw new SKimchiException(
+                    new SCastException(String.format(
+                            "#%s# cannot be cast to double."
+                            , getString(key, null)
+                            ))
+                    );
         }
         return Double.parseDouble(getString(key, null));
     }
-    public double getDouble(Object key, double defaultValue) throws SCastException {
+    public double getDouble(Object key, double defaultValue) throws SKimchiException {
         if(isNull(key)) {
             return defaultValue;
         }
         return getDouble(key);
     }
     
-    public long getLong(Object key) throws SCastException {
+    public long getLong(Object key) throws SKimchiException {
         Object value = get(key);
         if(value instanceof Long) {
             return (long) value;
         }
         if(!Pattern.matches("[0-9.]+", getString(key, ""))) {
-            throw new SCastException(String.format(
-                    "#%s# cannot be cast to long."
-                    , getString(key, null)
-                    ));
+            throw new SKimchiException(
+                    new SCastException(String.format(
+                            "#%s# cannot be cast to long."
+                            , getString(key, null)
+                            ))
+                    );
         }
         return Long.parseLong(getString(key, null));
     }
-    public long getLong(Object key, long defaultValue) throws SCastException {
+    public long getLong(Object key, long defaultValue) throws SKimchiException {
         if(isNull(key)) {
             return defaultValue;
         }
         return getLong(key);
     }
     
-    public float getFloat(Object key) throws SCastException {
+    public float getFloat(Object key) throws SKimchiException {
         Object value = get(key);
         if(value instanceof Float) {
             return (float) value;
         }
         if(!Pattern.matches("[0-9.]+", getString(key, ""))) {
-            throw new SCastException(String.format(
-                    "#%s# cannot be cast to float."
-                    , getString(key, null)
-                    ));
+            throw new SKimchiException(
+                    new SCastException(String.format(
+                            "#%s# cannot be cast to float."
+                            , getString(key, null)
+                            ))
+                    );
         }
         return Float.parseFloat(getString(key, null));
     }
-    public float getFloat(Object key, float defaultValue) throws SCastException {
+    public float getFloat(Object key, float defaultValue) throws SKimchiException {
         if(isNull(key)) {
             return defaultValue;
         }
         return getFloat(key);
     }
     
-    public BigInteger getBigInteger(Object key) throws SCastException {
+    public BigInteger getBigInteger(Object key) throws SKimchiException {
         Object value = get(key);
         if(value instanceof BigInteger) {
             return (BigInteger) value;
         }
         return BigInteger.valueOf(getLong(key));
     }
-    public BigInteger getBigInteger(Object key, BigInteger defaultValue) throws SCastException {
+    public BigInteger getBigInteger(Object key, BigInteger defaultValue) throws SKimchiException {
         if(isNull(key)) {
             return defaultValue;
         }
         return getBigInteger(key);
     }
     
-    public BigDecimal getBigDecimal(Object key) throws SCastException {
+    public BigDecimal getBigDecimal(Object key) throws SKimchiException {
         Object value = get(key);
         if(value instanceof BigDecimal) {
             return (BigDecimal) value;
         }
         return BigDecimal.valueOf(getLong(key));
     }
-    public BigDecimal getBigDecimal(Object key, BigDecimal defaultValue) throws SCastException {
+    public BigDecimal getBigDecimal(Object key, BigDecimal defaultValue) throws SKimchiException {
         if(isNull(key)) {
             return defaultValue;
         }
         return getBigDecimal(key);
     }
     
-    public Map getMap(Object key) throws SCastException {
+    public Map getMap(Object key) throws SKimchiException {
         Object value = get(key);
         if(value == null) {
             return null;
@@ -345,13 +356,15 @@ public class SLinkedHashMap extends LinkedHashMap {
         if(value instanceof Map) {
             return (Map) value;
         }
-        throw new SCastException(String.format(
-                "#%s# cannot be cast to Map."
-                , get(key).getClass().getName()
-                ));
+        throw new SKimchiException(
+                new SCastException(String.format(
+                        "#%s# cannot be cast to Map."
+                        , get(key).getClass().getName()
+                        ))
+                );
     }
     
-    public LinkedHashMap getLinkedHashMap(Object key) throws SCastException {
+    public LinkedHashMap getLinkedHashMap(Object key) throws SKimchiException {
         Object value = get(key);
         if(value == null) {
             return null;
@@ -359,25 +372,24 @@ public class SLinkedHashMap extends LinkedHashMap {
         if(value instanceof LinkedHashMap) {
             return (LinkedHashMap) value;
         }
-        throw new SCastException(String.format(
-                "#%s# cannot be cast to LinkedHashMap."
-                , get(key).getClass().getName()
-                ));
+        throw new SKimchiException(
+                new SCastException(String.format(
+                        "#%s# cannot be cast to LinkedHashMap."
+                        , get(key).getClass().getName()
+                        ))
+                );
     }
     
     @SuppressWarnings("unchecked")
-    public List<LinkedHashMap> getListLinkedHashMap(Object key) throws SCastException {
+    public List<LinkedHashMap> getListLinkedHashMap(Object key) throws SKimchiException {
         try {
             return (List<LinkedHashMap>) get(key);
         } catch (Exception e) {
-            throw new SCastException(String.format(
-                    "#%s# cannot be cast to List<LinkedHashMap>."
-                    , get(key).getClass().getName()
-                    ));
+            throw new SKimchiException(e);
         }
     }
     
-    public SLinkedHashMap getSLinkedHashMap(Object key) throws SCastException {
+    public SLinkedHashMap getSLinkedHashMap(Object key) throws SKimchiException {
         Object value = get(key);
         if(value == null) {
             return null;
@@ -385,32 +397,28 @@ public class SLinkedHashMap extends LinkedHashMap {
         if(value instanceof SLinkedHashMap) {
             return (SLinkedHashMap) value;
         }
-        throw new SCastException(String.format(
-                "#%s# cannot be cast to SLinkedHashMap."
-                , get(key).getClass().getName()
-                ));
+        throw new SKimchiException(
+                new SCastException(String.format(
+                        "#%s# cannot be cast to SLinkedHashMap."
+                        , get(key).getClass().getName()
+                        ))
+                );
     }
     
     @SuppressWarnings("unchecked")
-    public List<SLinkedHashMap> getListSLinkedHashMap(Object key) throws SCastException {
+    public List<SLinkedHashMap> getListSLinkedHashMap(Object key) throws SKimchiException {
         try {
             return (List<SLinkedHashMap>) get(key);
         } catch (Exception e) {
-            throw new SCastException(String.format(
-                    "#%s# cannot be cast to List<SLinkedHashMap>."
-                    , get(key).getClass().getName()
-                    ));
+            throw new SKimchiException(e);
         }
     }
     
-    public List getList(Object key) throws SCastException {
+    public List getList(Object key) throws SKimchiException {
         try {
             return (List) get(key);
         } catch (Exception e) {
-            throw new SCastException(String.format(
-                    "#%s# cannot be cast to List."
-                    , get(key).getClass().getName()
-                    ));
+            throw new SKimchiException(e);
         }
     }
     

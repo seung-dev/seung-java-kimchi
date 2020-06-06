@@ -6,11 +6,20 @@ import java.io.IOException;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+import seung.java.kimchi.exception.SKimchiException;
+
+/**
+ * <pre>
+ * File 관련 함수 모음
+ * </pre>
+ * 
+ * @author seung
+ */
 public class SFile {
 
     private SFile() {}
     
-    public static byte[] unzipSingleTextFile(byte[] zip) throws IOException {
+    public static byte[] unzipSingleTextFile(byte[] zip) throws SKimchiException {
         
         byte[] unzip = null;
         
@@ -30,6 +39,8 @@ public class SFile {
             }
             zipInputStream.closeEntry();
             zipInputStream.close();
+        } catch (IOException e) {
+            throw new SKimchiException(e);
         }
         
         return unzip;
