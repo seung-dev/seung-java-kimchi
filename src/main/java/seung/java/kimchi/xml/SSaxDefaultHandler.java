@@ -4,14 +4,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.xml.sax.Attributes;
-import org.xml.sax.ContentHandler;
-import org.xml.sax.Locator;
 import org.xml.sax.SAXException;
+import org.xml.sax.helpers.DefaultHandler;
 
 import seung.java.kimchi.exception.SSaxBreakException;
 import seung.java.kimchi.util.SLinkedHashMap;
 
-public class SSaxContentHandler implements ContentHandler {
+public class SSaxDefaultHandler extends DefaultHandler {
 
 	private boolean isSchema = true;
 	
@@ -78,32 +77,12 @@ public class SSaxContentHandler implements ContentHandler {
 	}
 	
 	@Override
-	public void setDocumentLocator(Locator locator) {
-		// no operation
-	}
-
-	@Override
-	public void startDocument() throws SAXException {
-		// no operation
-	}
-
-	@Override
-	public void endDocument() throws SAXException {
-		// no operation
-	}
-
-	@Override
-	public void startPrefixMapping(String prefix, String uri) throws SAXException {
-		// no operation
-	}
-
-	@Override
-	public void endPrefixMapping(String prefix) throws SAXException {
-		// no operation
-	}
-
-	@Override
-	public void startElement(String uri, String localName, String qName, Attributes atts) throws SAXException {
+	public void startElement(
+			String uri
+			, String localName
+			, String qName
+			, Attributes attributes
+			) throws SAXException {
 		
 		if(isFirst) {
 			path = qName;
@@ -129,11 +108,15 @@ public class SSaxContentHandler implements ContentHandler {
 		}
 		
 	}
-
+	
 	@SuppressWarnings("unchecked")
 	@Override
-	public void endElement(String uri, String localName, String qName) throws SAXException {
-
+	public void endElement(
+			String uri
+			, String localName
+			, String qName
+			) throws SAXException {
+		
 		if(isText) {
 			if(target.equals(path) && text.length() > 0) {
 				texts.add(text.toString());
@@ -158,10 +141,14 @@ public class SSaxContentHandler implements ContentHandler {
 		}
 		
 	}
-
+	
 	@Override
-	public void characters(char[] ch, int start, int length) throws SAXException {
-
+	public void characters(
+			char[] ch
+			, int start
+			, int length
+			) throws SAXException {
+		
 		if(isText || isItem) {
 			String content = String.copyValueOf(ch, start, length).trim();
 			if(isText && target.equals(path)) {
@@ -177,20 +164,5 @@ public class SSaxContentHandler implements ContentHandler {
 		}
 		
 	}
-
-	@Override
-	public void ignorableWhitespace(char[] ch, int start, int length) throws SAXException {
-		// no operation
-	}
-
-	@Override
-	public void processingInstruction(String target, String data) throws SAXException {
-		// no operation
-	}
-
-	@Override
-	public void skippedEntity(String name) throws SAXException {
-		// no operation
-	}
-
+	
 }
