@@ -13,8 +13,10 @@ import java.util.regex.Pattern;
 
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.Version;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 
 import seung.java.kimchi.exception.SCastException;
 import seung.java.kimchi.exception.SKimchiException;
@@ -40,7 +42,21 @@ public class SLinkedHashMap extends LinkedHashMap {
     @SuppressWarnings("unchecked")
     public SLinkedHashMap(String jsonString) throws SKimchiException {
         try {
-            this.putAll(new ObjectMapper().readValue(jsonString, Map.class));
+//            ObjectMapper objectMapper = new ObjectMapper();
+//            objectMapper.getSerializerProvider().setNullKeySerializer(new JsonSerializer<Object>() {
+//                @Override
+//                public void serialize(Object value, JsonGenerator jsonGenerator, SerializerProvider serializerProvider) throws IOException {
+//                    jsonGenerator.writeFieldName("");
+//                }
+//            });
+            this.putAll(
+                    new ObjectMapper()
+                    .registerModule(
+                            new SimpleModule("seung", Version.unknownVersion())
+                            .addAbstractTypeMapping(Map.class, SLinkedHashMap.class)
+                            )
+                    .readValue(jsonString, SLinkedHashMap.class)
+            );
         } catch (JsonParseException e) {
             throw new SKimchiException(e);
         } catch (JsonMappingException e) {
@@ -102,6 +118,12 @@ public class SLinkedHashMap extends LinkedHashMap {
         } catch (IOException e) {
             throw new SKimchiException(e);
         }
+    }
+    
+    @SuppressWarnings("unchecked")
+    public SLinkedHashMap add(Object key, Object value) {
+        super.put(key, value);
+        return this;
     }
     
     public SLinkedHashMap putObject(Object o) {

@@ -8,4 +8,6 @@ build
 /.settings/
 /bin/
 /gradle/
+
+# test
 /src/test/java/seung/

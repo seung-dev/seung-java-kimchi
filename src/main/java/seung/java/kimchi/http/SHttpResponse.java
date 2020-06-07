@@ -8,10 +8,12 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.Version;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 
 import lombok.Builder;
 import lombok.Getter;
@@ -80,7 +82,11 @@ public class SHttpResponse {
     }
     
     public String toJsonString(boolean isPretty) throws SKimchiException {
-        ObjectMapper objectMapper = new ObjectMapper();
+        ObjectMapper objectMapper = new ObjectMapper()
+                .registerModule(
+                new SimpleModule("seung", Version.unknownVersion())
+                .addAbstractTypeMapping(Map.class, SLinkedHashMap.class)
+                );
         objectMapper.getSerializerProvider().setNullKeySerializer(new JsonSerializer<Object>() {
             @Override
             public void serialize(Object value, JsonGenerator jsonGenerator, SerializerProvider serializerProvider) throws IOException {

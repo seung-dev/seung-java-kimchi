@@ -118,8 +118,9 @@ public class SSaxDefaultHandler extends DefaultHandler {
             ) throws SAXException {
         
         if(isText) {
-            if(target.equals(path) && text.length() > 0) {
-                texts.add(text.toString());
+            if(target.equals(path)) {
+                texts.add(text.length() > 0 ? text.toString() : "");
+                index++;
             }
         }
         
@@ -131,13 +132,12 @@ public class SSaxDefaultHandler extends DefaultHandler {
                 text.setLength(0);
             } else if(!target.equals(path) && index >= start) {
                 items.add(item);
+                index++;
             }
         }
         
         if(end == index) {
             throw new SAXException(new SSaxBreakException(String.format("index(%d) meets end(%d).", index, end)));
-        } else {
-            index++;
         }
         
     }

@@ -133,10 +133,11 @@ public class SSaxContentHandler implements ContentHandler {
     @SuppressWarnings("unchecked")
     @Override
     public void endElement(String uri, String localName, String qName) throws SAXException {
-
+        
         if(isText) {
-            if(target.equals(path) && text.length() > 0) {
-                texts.add(text.toString());
+            if(target.equals(path)) {
+                texts.add(text.length() > 0 ? text.toString() : "");
+                index++;
             }
         }
         
@@ -148,13 +149,12 @@ public class SSaxContentHandler implements ContentHandler {
                 text.setLength(0);
             } else if(!target.equals(path) && index >= start) {
                 items.add(item);
+                index++;
             }
         }
         
         if(end == index) {
             throw new SAXException(new SSaxBreakException(String.format("index(%d) meets end(%d).", index, end)));
-        } else {
-            index++;
         }
         
     }

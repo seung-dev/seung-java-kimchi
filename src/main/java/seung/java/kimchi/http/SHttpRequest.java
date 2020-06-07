@@ -1,5 +1,6 @@
 package seung.java.kimchi.http;
 
+import java.io.IOException;
 import java.net.Proxy;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
@@ -9,9 +10,14 @@ import java.util.Map;
 import org.apache.commons.lang3.tuple.Pair;
 
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.Version;
+import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -106,7 +112,12 @@ public class SHttpRequest {
     
     public String toJsonString(boolean isPretty) throws SKimchiException {
         try {
-            return new ObjectMapper()
+            ObjectMapper objectMapper = new ObjectMapper()
+                    .registerModule(
+                    new SimpleModule("seung", Version.unknownVersion())
+                    .addAbstractTypeMapping(Map.class, SLinkedHashMap.class)
+                    );
+            return objectMapper
                     .setSerializationInclusion(Include.ALWAYS)
 //                .configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false)
                     .configure(SerializationFeature.WRITE_ENUMS_USING_TO_STRING, true)
