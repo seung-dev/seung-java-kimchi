@@ -240,7 +240,7 @@ public class SLinkedHashMap extends LinkedHashMap {
         if(value instanceof Integer) {
             return (int) value;
         }
-        if(!Pattern.matches("[0-9]+", getString(key, ""))) {
+        if(!Pattern.matches("[0-9-]+", getString(key, ""))) {
             throw new SKimchiException(
                     new SCastException(String.format(
                             "#%s# cannot be cast to int."
