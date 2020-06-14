@@ -1,6 +1,5 @@
 package seung.java.kimchi.http;
 
-import java.io.IOException;
 import java.net.Proxy;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
@@ -10,13 +9,10 @@ import java.util.Map;
 import org.apache.commons.lang3.tuple.Pair;
 
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.Version;
-import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 
 import lombok.AccessLevel;
@@ -85,10 +81,15 @@ public class SHttpRequest {
     @Builder.Default
     private SCharset charset = SCharset.UTF_8;
     
-//    @Builder.Default
-//    @Setter(AccessLevel.NONE)
-    @Singular("data")
-    private List<Pair<String, String>> data;
+    @Builder.Default
+    private boolean useDataMap = true;
+    
+//  @Builder.Default
+//  @Setter(AccessLevel.NONE)
+    @Singular("dataMap")
+    private List<Pair<String, String>> dataMap;
+    
+    private byte[] data;
     
     public void addHeader(String key, String value) {
         if(header.get(key) == null) {
@@ -99,7 +100,7 @@ public class SHttpRequest {
     }
     
     public void addData(String key, String value) {
-        data.add(Pair.of(key, value));
+        dataMap.add(Pair.of(key, value));
     }
     
     public SLinkedHashMap toSLinkedHashMap() {
@@ -113,8 +114,7 @@ public class SHttpRequest {
     public String toJsonString(boolean isPretty) throws SKimchiException {
         try {
             ObjectMapper objectMapper = new ObjectMapper()
-                    .registerModule(
-                    new SimpleModule("seung", Version.unknownVersion())
+                    .registerModule(new SimpleModule("seung", Version.unknownVersion())
                     .addAbstractTypeMapping(Map.class, SLinkedHashMap.class)
                     );
             return objectMapper

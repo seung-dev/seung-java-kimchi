@@ -56,14 +56,14 @@ public class SHttp {
             URL url = null;
             
             StringBuffer data = new StringBuffer();
-            for(Pair<String, String> pair : sHttpRequest.getData()) {
+            for(Pair<String, String> pair : sHttpRequest.getDataMap()) {
                 data.append("&");
                 data.append(SRequestMethod.GET.equals(sHttpRequest.getRequestMethod()) ? encodeURIComponent(pair.getLeft(), sHttpRequest.getCharset()) : pair.getLeft());
                 data.append("=");
                 data.append(SRequestMethod.GET.equals(sHttpRequest.getRequestMethod()) ? encodeURIComponent(pair.getRight(), sHttpRequest.getCharset()) : pair.getRight());
             }// end of data
             
-            if(SRequestMethod.GET.equals(sHttpRequest.getRequestMethod()) && !sHttpRequest.getData().isEmpty()) {
+            if(SRequestMethod.GET.equals(sHttpRequest.getRequestMethod()) && !sHttpRequest.getDataMap().isEmpty()) {
                 String[] divided = sHttpRequest.getUrl().trim().split("\\?");
                 if(divided.length > 1) {
                     url = new URL(String.format("%s?%s%s", divided[0], divided[1], data.toString()));
@@ -146,7 +146,11 @@ public class SHttp {
             
             if(SRequestMethod.POST.equals(sHttpRequest.getRequestMethod()) && data.length() > 0) {
                 httpURLConnection.setDoOutput(true);
-                httpURLConnection.getOutputStream().write(data.toString().substring(1).getBytes(sHttpRequest.getCharset().text()));
+                if(sHttpRequest.isUseDataMap()) {
+                    httpURLConnection.getOutputStream().write(data.toString().substring(1).getBytes(sHttpRequest.getCharset().text()));
+                } else {
+                    httpURLConnection.getOutputStream().write(sHttpRequest.getData());
+                }
                 httpURLConnection.getOutputStream().flush();
                 httpURLConnection.getOutputStream().close();
             }
