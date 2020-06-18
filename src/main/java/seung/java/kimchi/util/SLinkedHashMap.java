@@ -11,6 +11,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
+import org.apache.commons.lang3.exception.ExceptionUtils;
+
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.Version;
@@ -88,17 +90,17 @@ public class SLinkedHashMap extends LinkedHashMap {
         return this;
     }
     
-    public String toJsonString() throws SKimchiException {
+    public String toJsonString() {
         return toJsonString(false);
     }
-    public String toJsonString(boolean isPretty) throws SKimchiException {
+    public String toJsonString(boolean isPretty) {
         try {
             if(isPretty) {
                 return new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(this);
             }
             return new ObjectMapper().writeValueAsString(this);
         } catch (JsonProcessingException e) {
-            throw new SKimchiException(e);
+            return String.format("{\"errorMessage\":\"%s\"}", ExceptionUtils.getStackTrace(e));
         }
     }
     
@@ -240,7 +242,7 @@ public class SLinkedHashMap extends LinkedHashMap {
         if(value instanceof Integer) {
             return (int) value;
         }
-        if(!Pattern.matches("[0-9-]+", getString(key, ""))) {
+        if(!Pattern.matches("[0-9+-]+", getString(key, ""))) {
             throw new SKimchiException(
                     new SCastException(String.format(
                             "#%s# cannot be cast to int."
@@ -281,7 +283,7 @@ public class SLinkedHashMap extends LinkedHashMap {
         if(value instanceof Double) {
             return (double) value;
         }
-        if(!Pattern.matches("[0-9.]+", getString(key, ""))) {
+        if(!Pattern.matches("[0-9+-.]+", getString(key, ""))) {
             throw new SKimchiException(
                     new SCastException(String.format(
                             "#%s# cannot be cast to double."
@@ -325,7 +327,7 @@ public class SLinkedHashMap extends LinkedHashMap {
         if(value instanceof Float) {
             return (float) value;
         }
-        if(!Pattern.matches("[0-9.]+", getString(key, ""))) {
+        if(!Pattern.matches("[0-9+-.]+", getString(key, ""))) {
             throw new SKimchiException(
                     new SCastException(String.format(
                             "#%s# cannot be cast to float."

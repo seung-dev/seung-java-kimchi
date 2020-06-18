@@ -66,6 +66,10 @@ public class SHttpResponse {
     @JsonIgnore
     private byte[] responseBody;
     
+    public String getResponseCharset(String defaultValue) {
+        return responseCharset == null ? defaultValue : responseCharset;
+    }
+    
     public SLinkedHashMap toSLinkedHashMap() {
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.getSerializerProvider().setNullKeySerializer(new JsonSerializer<Object>() {

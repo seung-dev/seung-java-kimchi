@@ -66,7 +66,7 @@ public class SHttpRequest {
     private boolean doInput = true;
     
     @Builder.Default
-    private boolean doOutput = false;
+    private boolean doOutput = true;
     
     @Builder.Default
     private int connectTimeout = 1000 * 3;
@@ -81,15 +81,13 @@ public class SHttpRequest {
     @Builder.Default
     private SCharset charset = SCharset.UTF_8;
     
-    @Builder.Default
-    private boolean useDataMap = true;
-    
-//  @Builder.Default
-//  @Setter(AccessLevel.NONE)
     @Singular("dataMap")
     private List<Pair<String, String>> dataMap;
     
-    private byte[] data;
+    @Builder.Default
+    private boolean useBody = false;
+    
+    private String body;
     
     public void addHeader(String key, String value) {
         if(header.get(key) == null) {

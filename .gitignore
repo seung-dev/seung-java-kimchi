@@ -10,4 +10,4 @@ build
 /gradle/
 
 # test
-/src/test/java/seung/
+/src/test/

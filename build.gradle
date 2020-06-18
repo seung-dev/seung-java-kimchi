@@ -44,9 +44,10 @@ dependencies {
     // json
     api('com.fasterxml.jackson.core:jackson-databind:2.9.9.3')
     
-    // parser
-    //api('org.jsoup:jsoup:1.9.1')
+    // http
+    api('com.konghq:unirest-java:3.7.03')
     
+    //api('org.jsoup:jsoup:1.9.1')
     
     // poi
     api('org.apache.poi:poi:3.17')

@@ -81,7 +81,9 @@ public class SHttp {
             if(SRequestMethod.GET.equals(sHttpRequest.getRequestMethod())) {
                 sHttpResponse.setQuery(url.getQuery());
             } else {
-                sHttpResponse.setQuery(data.toString().substring(1));
+                if(!sHttpRequest.isUseBody() && data.length() > 0) {
+                    sHttpResponse.setQuery(data.toString().substring(1));
+                }
             }// end of query
             
             if("http".equals(url.getProtocol())) {
@@ -134,6 +136,7 @@ public class SHttp {
             }// end of httpURLConnection
             
 //            httpURLConnection.setFollowRedirects(sHttpRequest.followRedirects());
+            httpURLConnection.setRequestMethod(sHttpRequest.getRequestMethod().text());
             httpURLConnection.setUseCaches(sHttpRequest.isUseCache());
             httpURLConnection.setDoInput(sHttpRequest.isDoInput());
             httpURLConnection.setDoOutput(sHttpRequest.isDoOutput());
@@ -144,15 +147,20 @@ public class SHttp {
                 httpURLConnection.setRequestProperty(key, sHttpRequest.getHeader().get(key).get(0));
             }// end of property
             
-            if(SRequestMethod.POST.equals(sHttpRequest.getRequestMethod()) && data.length() > 0) {
-                httpURLConnection.setDoOutput(true);
-                if(sHttpRequest.isUseDataMap()) {
+            if(SRequestMethod.POST.equals(sHttpRequest.getRequestMethod())) {
+                if(sHttpRequest.isUseBody() && sHttpRequest.getBody().length() > 0) {
+                    httpURLConnection.setDoOutput(true);
+                    httpURLConnection.getOutputStream().write(sHttpRequest.getBody().getBytes());
+                    httpURLConnection.getOutputStream().flush();
+                    httpURLConnection.getOutputStream().close();
+                } else if(data.length() > 0) {
+                    System.out.println(data.toString());
+                    System.out.println(sHttpRequest.getCharset().text());
+                    httpURLConnection.setDoOutput(true);
                     httpURLConnection.getOutputStream().write(data.toString().substring(1).getBytes(sHttpRequest.getCharset().text()));
-                } else {
-                    httpURLConnection.getOutputStream().write(sHttpRequest.getData());
+                    httpURLConnection.getOutputStream().flush();
+                    httpURLConnection.getOutputStream().close();
                 }
-                httpURLConnection.getOutputStream().flush();
-                httpURLConnection.getOutputStream().close();
             }
             
             sHttpResponse.setResponseCode(httpURLConnection.getResponseCode());
@@ -169,16 +177,18 @@ public class SHttp {
                 }
             }
             
-            if(sHttpResponse.getResponseCode() == HttpURLConnection.HTTP_OK && sHttpRequest.isDoInput() && httpURLConnection.getInputStream() != null) {
-                String contentEncoding = httpURLConnection.getContentEncoding();
-                String contentType     = httpURLConnection.getContentType();
-                sHttpResponse.setResponseLength(httpURLConnection.getContentLengthLong());
-                if(contentEncoding != null) {
-                    sHttpResponse.setResponseCharset(contentEncoding);
-                } else if(contentType != null && contentType.contains("charset=")) {
-                    sHttpResponse.setResponseCharset(contentType.split("charset=")[1].split(";")[0].trim());
+            if(sHttpResponse.getResponseCode() == HttpURLConnection.HTTP_OK) {
+                if(sHttpRequest.isDoInput() && httpURLConnection.getInputStream() != null) {
+                    String contentEncoding = httpURLConnection.getContentEncoding();
+                    String contentType     = httpURLConnection.getContentType();
+                    sHttpResponse.setResponseLength(httpURLConnection.getContentLengthLong());
+                    if(contentEncoding != null) {
+                        sHttpResponse.setResponseCharset(contentEncoding);
+                    } else if(contentType != null && contentType.contains("charset=")) {
+                        sHttpResponse.setResponseCharset(contentType.split("charset=")[1].split(";")[0].trim());
+                    }
+                    sHttpResponse.setResponseBody(IOUtils.toByteArray(httpURLConnection.getInputStream()));
                 }
-                sHttpResponse.setResponseBody(IOUtils.toByteArray(httpURLConnection.getInputStream()));
             }
             
         } catch (UnsupportedEncodingException e) {
