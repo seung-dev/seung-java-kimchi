@@ -4,14 +4,13 @@ import java.io.IOException;
 import java.util.UUID;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializerProvider;
-
-import seung.java.kimchi.util.SKimchiException;
 
 /**
  * <pre>
@@ -70,9 +69,8 @@ public class SString {
 	 * 
 	 * @param data
 	 * @return {@link #toJson(Object, boolean)}
-	 * @throws SKimchiException 
 	 */
-	public static String toJson(Object data) throws SKimchiException {
+	public static String toJson(Object data) {
 		return toJson(data, false);
 	}
 	/**
@@ -80,9 +78,9 @@ public class SString {
 	 * @see com.fasterxml.jackson.databind.ObjectMapper#writeValueAsString(Object)
 	 * @param data
 	 * @param isPretty
-	 * @throws SKimchiException 
 	 */
-	public static String toJson(Object data, boolean isPretty) throws SKimchiException {
+	public static String toJson(Object data, boolean isPretty) {
+		String json = "";
 		try {
 			ObjectMapper objectMapper = new ObjectMapper();
 			objectMapper.getSerializerProvider().setNullKeySerializer(new JsonSerializer<Object>() {
@@ -92,12 +90,13 @@ public class SString {
 				}
 			});
 			if(isPretty) {
-				return objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(data);
+				json = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(data);
 			}
-			return objectMapper.writeValueAsString(data);
+			json = objectMapper.writeValueAsString(data);
 		} catch (JsonProcessingException e) {
-			throw new SKimchiException(e);
+			json = String.format("{\"errorMessage\":\"%s\"}", ExceptionUtils.getStackTrace(e));
 		}
+		return json;
 	}
 	
 	/**
