@@ -1,2 +1,2 @@
 # seung-java-kimchi
-seung java library contains utility classes
+seung java library project

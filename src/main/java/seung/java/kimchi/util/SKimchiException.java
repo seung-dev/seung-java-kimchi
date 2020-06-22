@@ -1,4 +1,4 @@
-package seung.java.kimchi.exception;
+package seung.java.kimchi.util;
 
 public class SKimchiException extends Exception {
 
