@@ -250,7 +250,7 @@ public class SLinkedHashMap extends LinkedHashMap {
 		return Integer.parseInt(getString(key));
 	}
 	public int getInt(Object key, int defaultValue) throws SKimchiException {
-		if(isNull(key)) {
+		if(isEmpty(key)) {
 			return defaultValue;
 		}
 		return getInt(key);
@@ -291,7 +291,7 @@ public class SLinkedHashMap extends LinkedHashMap {
 		return Double.parseDouble(getString(key, null));
 	}
 	public double getDouble(Object key, double defaultValue) throws SKimchiException {
-		if(isNull(key)) {
+		if(isEmpty(key)) {
 			return defaultValue;
 		}
 		return getDouble(key);
@@ -302,7 +302,7 @@ public class SLinkedHashMap extends LinkedHashMap {
 		if(value instanceof Long) {
 			return (long) value;
 		}
-		if(!Pattern.matches("[0-9.]+", getString(key, ""))) {
+		if(!Pattern.matches("[0-9+-.]+", getString(key, ""))) {
 			throw new SKimchiException(
 					new SKimchiException(String.format(
 							"#%s# cannot be cast to long."
@@ -313,7 +313,7 @@ public class SLinkedHashMap extends LinkedHashMap {
 		return Long.parseLong(getString(key, null));
 	}
 	public long getLong(Object key, long defaultValue) throws SKimchiException {
-		if(isNull(key)) {
+		if(isEmpty(key)) {
 			return defaultValue;
 		}
 		return getLong(key);
@@ -335,7 +335,7 @@ public class SLinkedHashMap extends LinkedHashMap {
 		return Float.parseFloat(getString(key, null));
 	}
 	public float getFloat(Object key, float defaultValue) throws SKimchiException {
-		if(isNull(key)) {
+		if(isEmpty(key)) {
 			return defaultValue;
 		}
 		return getFloat(key);
@@ -349,7 +349,7 @@ public class SLinkedHashMap extends LinkedHashMap {
 		return BigInteger.valueOf(getLong(key));
 	}
 	public BigInteger getBigInteger(Object key, BigInteger defaultValue) throws SKimchiException {
-		if(isNull(key)) {
+		if(isEmpty(key)) {
 			return defaultValue;
 		}
 		return getBigInteger(key);
@@ -363,7 +363,7 @@ public class SLinkedHashMap extends LinkedHashMap {
 		return BigDecimal.valueOf(getLong(key));
 	}
 	public BigDecimal getBigDecimal(Object key, BigDecimal defaultValue) throws SKimchiException {
-		if(isNull(key)) {
+		if(isEmpty(key)) {
 			return defaultValue;
 		}
 		return getBigDecimal(key);
