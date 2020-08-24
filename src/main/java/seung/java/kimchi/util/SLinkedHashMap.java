@@ -48,6 +48,9 @@ public class SLinkedHashMap extends LinkedHashMap {
 //					jsonGenerator.writeFieldName("");
 //				}
 //			});
+			if(jsonString == null || "".equals(jsonString)) {
+				return;
+			}
 			this.putAll(
 					new ObjectMapper()
 					.registerModule(
@@ -149,7 +152,7 @@ public class SLinkedHashMap extends LinkedHashMap {
 	}
 	
 	public boolean isBlank(Object key) {
-		return "".equals(getString(key, ""));
+		return "".equals(get(key));
 	}
 	
 	public boolean isEmpty(Object key) {
@@ -164,10 +167,10 @@ public class SLinkedHashMap extends LinkedHashMap {
 		return getString(key, null);
 	}
 	public String getString(Object key, String defaultValue) {
-		Object value = get(key);
-		if(value == null) {
+		if(isEmpty(key)) {
 			return defaultValue;
 		}
+		Object value = get(key);
 		if(value instanceof String) {
 			return "" + value;
 		}

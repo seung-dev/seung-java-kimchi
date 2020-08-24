@@ -326,6 +326,13 @@ public class SConvert {
 	public static String encodeBase64String(byte[] binaryData) {
 		return Base64.encodeBase64String(binaryData);
 	}
+	/**
+	 * @see org.apache.commons.codec.binary.Base64#encodeBase64String(byte[])
+	 * @param binaryData
+	 */
+	public static byte[] encodeBase64(byte[] binaryData) {
+		return Base64.encodeBase64(binaryData);
+	}
 	
 	/**
 	 * @param data

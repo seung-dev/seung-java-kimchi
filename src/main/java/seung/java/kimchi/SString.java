@@ -91,8 +91,9 @@ public class SString {
 			});
 			if(isPretty) {
 				json = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(data);
+			} else {
+				json = objectMapper.writeValueAsString(data);
 			}
-			json = objectMapper.writeValueAsString(data);
 		} catch (JsonProcessingException e) {
 			json = String.format("{\"errorMessage\":\"%s\"}", ExceptionUtils.getStackTrace(e));
 		}
