@@ -53,6 +53,9 @@ dependencies {
 	api('org.apache.poi:poi:3.17')
 	api('org.apache.poi:poi-ooxml:3.17')
 	
+	// pdf
+	api('org.apache.pdfbox:pdfbox:2.0.21')
+	
 	// bouncycastle
 	api('org.bouncycastle:bcprov-jdk15on:1.57')
 	

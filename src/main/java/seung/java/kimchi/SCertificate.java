@@ -2,21 +2,13 @@ package seung.java.kimchi;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.lang.reflect.Field;
-import java.math.BigInteger;
 import java.security.cert.CertificateException;
-import java.security.cert.Extension;
 import java.security.cert.X509Certificate;
-import java.util.Date;
 import java.util.TimeZone;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.jcajce.provider.asymmetric.x509.CertificateFactory;
-import org.bouncycastle.util.encoders.Hex;
 
-import seung.java.kimchi.util.SCharset;
-import seung.java.kimchi.util.SKimchiException;
 import seung.java.kimchi.util.SSignCertDer;
 
 public class SCertificate {
