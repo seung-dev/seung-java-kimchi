@@ -100,6 +100,16 @@ public class SString {
 		return json;
 	}
 	
+	public static String concat(String... items) {
+		
+		StringBuffer stringBuffer = new StringBuffer();
+		for(String item : items) {
+			stringBuffer.append(item);
+		}
+		
+		return stringBuffer.toString();
+	}
+	
 	/**
 	 * @see org.apache.commons.lang3.StringUtils#repeat(String, int)
 	 * @param data

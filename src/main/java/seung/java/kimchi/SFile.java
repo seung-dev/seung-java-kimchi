@@ -3,6 +3,8 @@ package seung.java.kimchi;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -44,6 +46,65 @@ public class SFile {
 		}
 		
 		return unzip;
+	}
+	
+	public static String getContentDisposition(String userAgent, String fileName) {
+		String format = "attachment; filename=%s";
+		StringBuffer encodedFileName = new StringBuffer();
+		try {
+			switch(getBrowser(userAgent)) {
+			case "MSIE":
+				encodedFileName.append(URLEncoder.encode(fileName, "UTF-8").replaceAll("\\+", "%20"));
+				break;
+			case "Chrome":
+				for(int i = 0; i < fileName.length(); i++) {
+					char c = fileName.charAt(i);
+					if(c > '~') {
+						encodedFileName.append(URLEncoder.encode("" + c, "UTF-8"));
+					} else {
+						encodedFileName.append(c);
+					}
+				}
+				break;
+			case "Firefox":
+			case "Opera":
+				encodedFileName.append("\"" + new String(fileName.getBytes("UTF-8"), "8859_1") +"\"");
+				break;
+			default:
+				break;
+			}
+		} catch (UnsupportedEncodingException e) {
+		}
+		return String.format(format, encodedFileName.toString());
+	}
+	
+	public static String getContentType(String userAgent) {
+		String contentType = "application/download; utf-8";
+		switch(getBrowser(userAgent)) {
+			case "MSIE":
+			case "Chrome":
+			case "Firefox":
+				break;
+			case "Opera":
+				contentType = "application/octet-stream; charset=UTF-8";
+				break;
+			default:
+				break;
+		}
+		return contentType;
+	}
+	
+	public static String getBrowser(String userAgent) {
+		if(userAgent.indexOf("MSIE") > -1) {
+			return "MSIE";
+		} else if(userAgent.indexOf("Trident") > -1) {
+			return "MSIE";
+		} else if(userAgent.indexOf("Chrome") > -1) {
+			return "Chrome";
+		} else if(userAgent.indexOf("Opera") > -1) {
+			return "Opera";
+		}
+		return "Firefox";
 	}
 	
 }
