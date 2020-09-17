@@ -2,10 +2,10 @@ plugins {
 	id 'java-library'
 }
 
+/*
 version = '20.05.01.01'
 group = 'seung.java'
 
-/*
 java {
 	sourceCompatibility = JavaVersion.VERSION_1_8
 	targetCompatibility = JavaVersion.VERSION_1_8
