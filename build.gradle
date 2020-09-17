@@ -63,6 +63,7 @@ dependencies {
 	
 }
 
+/*
 task fatJar(type: Jar) {
 	baseName = 'seung-java-kimchi'
 	from {
@@ -71,6 +72,7 @@ task fatJar(type: Jar) {
 	}
 	with jar
 }
+*/
 
 task sourcesJar(type: Jar, dependsOn: classes) {
 	classifier = 'sources'
