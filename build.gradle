@@ -90,6 +90,7 @@ artifacts {
 }
 
 // To specify a license in the pom:
+/*
 install {
 	repositories.mavenInstaller {
 		pom.project {
@@ -103,3 +104,4 @@ install {
 		}
 	}
 }
+*/
