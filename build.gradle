@@ -5,11 +5,13 @@ plugins {
 version = '20.05.01.01'
 group = 'seung.java'
 
+/*
 java {
 	sourceCompatibility = JavaVersion.VERSION_1_8
 	targetCompatibility = JavaVersion.VERSION_1_8
 	//withJavadocJar()
 }
+*/
 
 [compileJava, compileTestJava, javadoc]*.options*.encoding = 'UTF-8'
 
