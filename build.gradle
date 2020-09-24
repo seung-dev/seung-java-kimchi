@@ -5,13 +5,12 @@ plugins {
 version = '20.05.01.01'
 group = 'seung.java'
 
+/*
 java {
 	sourceCompatibility = JavaVersion.VERSION_1_8
 	targetCompatibility = JavaVersion.VERSION_1_8
 	//withJavadocJar()
 }
-
-[compileJava, compileTestJava, javadoc]*.options*.encoding = 'UTF-8'
 
 if(JavaVersion.current().isJava8Compatible()) {
 	allprojects {
@@ -20,6 +19,9 @@ if(JavaVersion.current().isJava8Compatible()) {
 		}
 	}
 }
+*/
+
+[compileJava, compileTestJava, javadoc]*.options*.encoding = 'UTF-8'
 
 repositories {
 	mavenCentral()
