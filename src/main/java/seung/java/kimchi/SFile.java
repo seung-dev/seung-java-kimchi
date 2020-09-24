@@ -54,9 +54,12 @@ public class SFile {
 		try {
 			switch(getBrowser(userAgent)) {
 			case "MSIE":
+				encodedFileName.append("\"");
 				encodedFileName.append(URLEncoder.encode(fileName, "UTF-8").replaceAll("\\+", "%20"));
+				encodedFileName.append("\"");
 				break;
 			case "Chrome":
+				encodedFileName.append("\"");
 				for(int i = 0; i < fileName.length(); i++) {
 					char c = fileName.charAt(i);
 					if(c > '~') {
@@ -65,10 +68,13 @@ public class SFile {
 						encodedFileName.append(c);
 					}
 				}
+				encodedFileName.append("\"");
 				break;
 			case "Firefox":
 			case "Opera":
-				encodedFileName.append("\"" + new String(fileName.getBytes("UTF-8"), "8859_1") +"\"");
+				encodedFileName.append("\"");
+				encodedFileName.append(new String(fileName.getBytes("UTF-8"), "8859_1"));
+				encodedFileName.append("\"");
 				break;
 			default:
 				break;
