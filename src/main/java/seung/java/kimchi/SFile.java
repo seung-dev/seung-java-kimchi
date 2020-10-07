@@ -2,11 +2,14 @@ package seung.java.kimchi;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
+
+import org.apache.commons.io.FileUtils;
 
 import seung.java.kimchi.util.SKimchiException;
 
@@ -111,6 +114,49 @@ public class SFile {
 			return "Opera";
 		}
 		return "Firefox";
+	}
+	
+	public static String fileToString(
+			String path
+			, String encoding
+			) throws IOException {
+		File file = new File(path);
+		if(file.exists()) {
+			return FileUtils.readFileToString(file, encoding);
+		}
+		return null;
+	}
+	
+	public static byte[] fileToByteArray(
+			String path
+			) throws IOException {
+		File file = new File(path);
+		if(file.exists()) {
+			return FileUtils.readFileToByteArray(file);
+		}
+		return null;
+	}
+	
+	public static int toFile(
+			String path
+			, byte[] data
+			) {
+		
+		int exists = 0;
+		
+		File newFile = new File(path);
+		try {
+			FileUtils.writeByteArrayToFile(newFile, data);
+			if(newFile.exists()) {
+				exists = 1;
+			}
+		} catch (IOException e) {
+			if(newFile.exists()) {
+				exists = -1;
+			}
+		}
+		
+		return exists;
 	}
 	
 }
