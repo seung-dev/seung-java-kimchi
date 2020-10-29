@@ -3,6 +3,10 @@ package seung.java.kimchi;
 import kong.unirest.GetRequest;
 import kong.unirest.HttpResponse;
 
+/**
+ * @author seung20200706
+ *
+ */
 public class SHttp {
 
 	public static HttpResponse<byte[]> request(
