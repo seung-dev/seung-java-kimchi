@@ -1,6 +1,6 @@
 package seung.java.kimchi;
 
-import kong.unirest.GetRequest;
+import kong.unirest.HttpRequest;
 import kong.unirest.HttpResponse;
 
 /**
@@ -9,13 +9,15 @@ import kong.unirest.HttpResponse;
  */
 public class SHttp {
 
+	@SuppressWarnings("rawtypes")
 	public static HttpResponse<byte[]> request(
-			GetRequest getRequest
+			HttpRequest httpRequest
 			) throws InterruptedException {
-		return request(getRequest, 0, 0);
+		return request(httpRequest, 0, 0);
 	}
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public static HttpResponse<byte[]> request(
-			GetRequest getRequest
+			HttpRequest httpRequest
 			, int max
 			, long millis
 			) throws InterruptedException {
@@ -25,7 +27,7 @@ public class SHttp {
 		int request = 0;
 		while(request++ < max) {
 			try {
-				httpResponse = getRequest.asBytes();
+				httpResponse = httpRequest.asBytes();
 			} catch (Exception e) {
 				if(millis > 0) {
 					Thread.sleep(millis);
