@@ -11,6 +11,11 @@ import java.util.zip.DataFormatException;
 import java.util.zip.Deflater;
 import java.util.zip.Inflater;
 
+import javax.crypto.Cipher;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.spec.SecretKeySpec;
+
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.binary.Hex;
@@ -28,6 +33,44 @@ import seung.java.kimchi.util.SKimchiException;
 public class SConvert {
 
 	private SConvert() {}
+	
+	public static byte[] decryptAES256(byte[] encrypted, byte[] key, byte[] iv) {
+		
+		byte[] decrypted = null;
+		
+		try {
+			
+			Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
+			SecretKey secretKey = new SecretKeySpec(key, "AES");
+			cipher.init(Cipher.DECRYPT_MODE, secretKey, new IvParameterSpec(iv));
+			
+			decrypted = cipher.doFinal(encrypted);
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		return decrypted;
+	}
+	
+	public static byte[] encryptAES256(byte[] data, byte[] key, byte[] iv) {
+		
+		byte[] encrypted = null;
+		
+		try {
+			
+			Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
+			SecretKey secretKey = new SecretKeySpec(key, "AES");
+			cipher.init(Cipher.ENCRYPT_MODE, secretKey, new IvParameterSpec(iv));
+			
+			encrypted = cipher.doFinal(data);
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		return encrypted;
+	}
 	
 	public static byte[] decompress(byte[] data) throws SKimchiException {
 		return decompress(data, true);
