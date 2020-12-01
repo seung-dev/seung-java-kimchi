@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 
 import com.fasterxml.jackson.core.JsonParseException;
@@ -212,6 +213,31 @@ public class SLinkedHashMap extends LinkedHashMap {
 		if(value instanceof List) {
 			List values = (List) value;
 			return (String[]) values.toArray(new String[values.size()]);
+		}
+		return null;
+	}
+	
+	@SuppressWarnings("unchecked")
+	public int[] getIntegerArray(Object key) {
+		Object value = get(key);
+		if(value == null) {
+			return null;
+		}
+		if(value instanceof Integer) {
+			int[] array = {
+					(int) value
+			};
+			return array;
+		}
+		if(value instanceof int[]) {
+			return (int[]) value;
+		}
+		if(value instanceof Integer[]) {
+			return (int[]) value;
+		}
+		if(value instanceof List) {
+			List values = (List) value;
+			return (int[]) ArrayUtils.toPrimitive(values.toArray(new Integer[values.size()]));
 		}
 		return null;
 	}
