@@ -243,6 +243,31 @@ public class SLinkedHashMap extends LinkedHashMap {
 	}
 	
 	@SuppressWarnings("unchecked")
+	public double[] getDoubleArray(Object key) {
+		Object value = get(key);
+		if(value == null) {
+			return null;
+		}
+		if(value instanceof Double) {
+			double[] array = {
+					(double) value
+			};
+			return array;
+		}
+		if(value instanceof double[]) {
+			return (double[]) value;
+		}
+		if(value instanceof Double[]) {
+			return (double[]) value;
+		}
+		if(value instanceof List) {
+			List values = (List) value;
+			return (double[]) ArrayUtils.toPrimitive(values.toArray(new Double[values.size()]));
+		}
+		return null;
+	}
+	
+	@SuppressWarnings("unchecked")
 	public List<String> getStringList(Object key) {
 		Object value = get(key);
 		if(value == null) {
