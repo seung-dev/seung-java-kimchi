@@ -59,7 +59,8 @@ dependencies {
 	api('org.apache.pdfbox:pdfbox:2.0.21')
 	
 	// bouncycastle
-	api('org.bouncycastle:bcprov-jdk15on:1.57')
+	api('org.bouncycastle:bcprov-jdk15on:1.67')
+	api('org.bouncycastle:bcpkix-jdk15on:1.67')
 	
 	// sftp
 	api('com.jcraft:jsch:0.1.55')

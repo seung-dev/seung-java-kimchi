@@ -3,6 +3,7 @@ package seung.java.kimchi;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.Security;
@@ -403,6 +404,9 @@ public class SConvert {
 		}
 	}
 	
+	public static String encodeHexString(BigInteger data) {
+		return Hex.encodeHexString(data.toByteArray(), true);
+	}
 	/**
 	 * @param data
 	 * @param sCharset {@link seung.java.kimchi.util.SCharset}

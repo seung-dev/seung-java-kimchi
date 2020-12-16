@@ -3,6 +3,7 @@ package seung.java.kimchi;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Locale;
 import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 
@@ -213,6 +214,14 @@ public class SDate {
 	public static String getDateString(String pattern, Date date, TimeZone timeZone) {
 		SimpleDateFormat simpleDateFormat = new SimpleDateFormat(pattern);
 		simpleDateFormat.setTimeZone(timeZone);
+		return simpleDateFormat.format(date);
+	}
+	
+	public static String getDateString(String pattern, Locale locale) {
+		return getDateString(pattern, new Date(), locale);
+	}
+	public static String getDateString(String pattern, Date date, Locale locale) {
+		SimpleDateFormat simpleDateFormat = new SimpleDateFormat(pattern, locale);
 		return simpleDateFormat.format(date);
 	}
 	
