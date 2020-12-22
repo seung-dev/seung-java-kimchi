@@ -1,8 +1,11 @@
 package seung.java.kimchi;
 
+import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -23,6 +26,31 @@ import seung.java.kimchi.util.SKimchiException;
 public class SFile {
 
 	private SFile() {}
+	
+	public static int toFile(ZipInputStream zipInputStream, String path, int size) {
+		
+		int result = -1;
+		try(
+				FileOutputStream fileOutputStream = new FileOutputStream(path);
+				BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(fileOutputStream);
+				) {
+			byte[] b = new byte[size];
+			int read;
+			while((read = zipInputStream.read(b)) > 0) {
+				bufferedOutputStream.write(b, 0, read);
+			}
+		} catch (FileNotFoundException e) {
+			result = 0;
+		} catch (IOException e) {
+			result = 0;
+		} finally {
+			if(new File(path).exists()) {
+				result = 1;
+			}
+		}
+		
+		return result;
+	}
 	
 	public static byte[] unzipSingleTextFile(byte[] zip) throws SKimchiException {
 		
