@@ -4,9 +4,9 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * <pre>
+ * <pre>{@code
  * time units enum
- * </pre>
+ * }</pre>
  * @author seung
  * @since 2020.05.11
  */

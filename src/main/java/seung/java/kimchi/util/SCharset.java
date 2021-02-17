@@ -7,9 +7,9 @@ import java.util.List;
 import java.util.SortedMap;
 
 /**
- * <pre>
+ * <pre>{@code
  * charsets enum
- * </pre>
+ * }</pre>
  * @author seung
  * @since 2020.05.11
  */

@@ -22,9 +22,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 
 /**
- * <pre>
+ * <pre>{@code
  * advanced custom map
- * </pre>
+ * }</pre>
  * 
  * @author seung
  * @since 2020.05.11

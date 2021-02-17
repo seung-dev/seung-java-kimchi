@@ -13,9 +13,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializerProvider;
 
 /**
- * <pre>
+ * <pre>{@code
  * String 관련 함수 모음
- * </pre>
+ * }</pre>
  * 
  * @author seung
  */
@@ -24,9 +24,9 @@ public class SString {
 	private SString() {}
 	
 	/**
-	 * <pre>
+	 * <pre>{@code
 	 * default padChar is blank.
-	 * </pre>
+	 * }</pre>
 	 * 
 	 * @param data
 	 * @param maxLength
@@ -43,9 +43,9 @@ public class SString {
 		return String.format("%" + maxLength + "s", data).replace(" ", padChar);
 	}
 	/**
-	 * <pre>
+	 * <pre>{@code
 	 * default padChar is blank.
-	 * </pre>
+	 * }</pre>
 	 * 
 	 * @param data
 	 * @param maxLength
@@ -63,9 +63,9 @@ public class SString {
 	}
 	
 	/**
-	 * <pre>
+	 * <pre>{@code
 	 * default isPretty is false.
-	 * </pre>
+	 * }</pre>
 	 * 
 	 * @param data
 	 * @return {@link #toJson(Object, boolean)}

@@ -25,9 +25,9 @@ import seung.java.kimchi.util.SCharset;
 import seung.java.kimchi.util.SKimchiException;
 
 /**
- * <pre>
+ * <pre>{@code
  * Convert 관련 함수 모음
- * </pre>
+ * }</pre>
  * 
  * @author stoas
  */
@@ -201,9 +201,9 @@ public class SConvert {
 //	}
 	
 	/**
-	 * <pre>
+	 * <pre>{@code
 	 * default sCharset is {@link seung.java.kimchi.util.SCharset#UTF_8}.
-	 * </pre>
+	 * }</pre>
 	 * 
 	 * @param algorithm {@link #availableDigestAlgorithm}
 	 * @param data
@@ -225,10 +225,10 @@ public class SConvert {
 	}
 	
 	/**
-	 * <pre>
+	 * <pre>{@code
 	 * default sCharset is {@link seung.java.kimchi.util.SCharset#UTF_8}.
 	 * default toLowerCase is false.
-	 * </pre>
+	 * }</pre>
 	 * 
 	 * @param algorithm {@link #availableDigestAlgorithm}
 	 * @param data
@@ -251,9 +251,9 @@ public class SConvert {
 	}
 	
 	/**
-	 * <pre>
+	 * <pre>{@code
 	 * default sCharset is {@link seung.java.kimchi.util.SCharset#UTF_8}.
-	 * </pre>
+	 * }</pre>
 	 * 
 	 * @param algorithm {@link #availableDigestAlgorithm}
 	 * @param data
@@ -290,9 +290,9 @@ public class SConvert {
 		}
 	}
 	/**
-	 * <pre>
+	 * <pre>{@code
 	 * could add providers like "Security.addProvider(new BouncyCastleProvider())".
-	 * </pre>
+	 * }</pre>
 	 * 
 	 * @return "SHA-384", "SHA-224", "SHA-256", "MD2", "SHA", "SHA-512", "MD5"
 	 */

@@ -17,9 +17,9 @@ import org.apache.commons.io.FileUtils;
 import seung.java.kimchi.util.SKimchiException;
 
 /**
- * <pre>
+ * <pre>{@code
  * File 관련 함수 모음
- * </pre>
+ * }</pre>
  * 
  * @author seung
  */

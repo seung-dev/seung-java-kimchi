@@ -13,9 +13,9 @@ import seung.java.kimchi.util.SKimchiException;
 import seung.java.kimchi.util.STimeUnit;
 
 /**
- * <pre>
+ * <pre>{@code
  * Date 관련 함수 모음
- * </pre>
+ * }</pre>
  * 
  * @author seung
  */
@@ -141,11 +141,11 @@ public class SDate {
 	}
 	
 	/**
-	 * <pre>
+	 * <pre>{@code
 	 * default pattern is "yyyy-MM-dd'T'HH:mm:ss.SSSXXX".
 	 * default date is today.
 	 * default timeZone is "TimeZone.getDefault()".
-	 * </pre>
+	 * }</pre>
 	 * 
 	 * @return {@link #getDateString(String, Date, TimeZone)}
 	 */
@@ -153,10 +153,10 @@ public class SDate {
 		return getDateString("yyyy-MM-dd'T'HH:mm:ss.SSSXXX", new Date(), TimeZone.getDefault());
 	}
 	/**
-	 * <pre>
+	 * <pre>{@code
 	 * default date is today.
 	 * default timeZone is "TimeZone.getDefault()".
-	 * </pre>
+	 * }</pre>
 	 * 
 	 * @param pattern
 	 * @return
@@ -165,9 +165,9 @@ public class SDate {
 		return getDateString(pattern, new Date());
 	}
 	/**
-	 * <pre>
+	 * <pre>{@code
 	 * default timeZone is "TimeZone.getDefault()".
-	 * </pre>
+	 * }</pre>
 	 * 
 	 * @param pattern
 	 * @param yyyyMMdd
@@ -177,9 +177,9 @@ public class SDate {
 		return getDateString(pattern, yyyyMMdd, TimeZone.getDefault());
 	}
 	/**
-	 * <pre>
+	 * <pre>{@code
 	 * default timeZone is "TimeZone.getDefault()".
-	 * </pre>
+	 * }</pre>
 	 * 
 	 * @param pattern
 	 * @param date
@@ -226,10 +226,10 @@ public class SDate {
 	}
 	
 	/**
-	 * <pre>
+	 * <pre>{@code
 	 * default pattern is "yyyyMMdd".
 	 * default timeZone is "TimeZone.getDefault()".
-	 * </pre>
+	 * }</pre>
 	 * 
 	 * @param yyyyMMdd
 	 * @return {@link #stringToDate(String, String)}
@@ -239,9 +239,9 @@ public class SDate {
 		return toDate(yyyyMMdd, "yyyyMMdd");
 	}
 	/**
-	 * <pre>
+	 * <pre>{@code
 	 * default timeZone is "TimeZone.getDefault()".
-	 * </pre>
+	 * }</pre>
 	 * 
 	 * @param dateString
 	 * @param pattern year=yyyy, month=MM, day=dd, hour=HH, minute=mm, second=ss, millisecond=SSS
